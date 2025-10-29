@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               Text(
-                "Login",
+                "Create Your Account",
                 style: GoogleFonts.poppins(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -33,7 +33,7 @@ class LoginPage extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                "to continue your journey",
+                "to begin a journey in Voice Voyage",
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -64,7 +64,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -77,7 +77,7 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Login',
+                    'Sign up',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -86,18 +86,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  "Forgot your password?",
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey[400])),
@@ -116,7 +105,7 @@ class LoginPage extends StatelessWidget {
                   onPressed: () {},
                   icon: Image.asset('assets/google.png', height: 24),
                   label: Text(
-                    'Login with Google',
+                    'Sign in with Google',
                     style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -132,13 +121,13 @@ class LoginPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("New to Voice Voyage?", style: GoogleFonts.poppins()),
+                  Text("Already have an account?", style: GoogleFonts.poppins()),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
+                      Navigator.pushNamed(context, '/login');
                     },
                     child: Text(
-                      "Sign up here",
+                      "Login here",
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,

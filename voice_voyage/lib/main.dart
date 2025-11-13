@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:voice_voyage/store.dart';
 
 import 'login.dart';
 import 'signup.dart';
 import 'app_colors.dart';
+import 'homepage.dart';
+import 'settings.dart';
+import 'dictionary.dart';
 
 void main() => runApp(const MyApp());
 
@@ -42,6 +46,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
+        '/homepage': (context) => const HomePage(),
+        '/store': (context) => const StorePage(),
+        '/dictionary': (context) => const DictionaryPage(),
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }

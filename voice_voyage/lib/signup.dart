@@ -16,12 +16,7 @@ class SignUpPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-              Center(
-                child: Image.asset(
-                  'assets/logo.png',
-                  height: 180,
-                ),
-              ),
+              Center(child: Image.asset('assets/images/logo.png', height: 180)),
               const SizedBox(height: 30),
               Text(
                 "Create Your Account",
@@ -103,10 +98,13 @@ class SignUpPage extends StatelessWidget {
                 height: 50,
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: Image.asset('assets/google.png', height: 24),
+                  icon: Image.asset('assets/images/google.png', height: 24),
                   label: Text(
                     'Sign in with Google',
-                    style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      color: Colors.black87,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.grey.shade300),
@@ -121,7 +119,10 @@ class SignUpPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Already have an account?", style: GoogleFonts.poppins()),
+                  Text(
+                    "Already have an account?",
+                    style: GoogleFonts.poppins(),
+                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/login');

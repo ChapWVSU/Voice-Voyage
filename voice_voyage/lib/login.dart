@@ -17,12 +17,7 @@ class LoginPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-              Center(
-                child: Image.asset(
-                  'assets/logo.png',
-                  height: 180,
-                ),
-              ),
+              Center(child: Image.asset('assets/images/logo.png', height: 180)),
               const SizedBox(height: 30),
               Text(
                 "Login",
@@ -72,8 +67,8 @@ class LoginPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomePage()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -120,10 +115,13 @@ class LoginPage extends StatelessWidget {
                 height: 50,
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: Image.asset('assets/google.png', height: 24),
+                  icon: Image.asset('assets/images/google.png', height: 24),
                   label: Text(
                     'Login with Google',
-                    style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      color: Colors.black87,
+                    ),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.grey.shade300),

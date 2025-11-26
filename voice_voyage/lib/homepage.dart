@@ -1,11 +1,12 @@
 // homepage.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'dictionary.dart';
-import 'store.dart';
-import 'settings.dart';
+// import 'dictionary.dart';
+// import 'store.dart';
+// import 'settings.dart';
 import 'animal.dart';
 import 'basic_greetings.dart';
+import 'colors.dart';
 
 class Category {
   final String title;
@@ -47,7 +48,7 @@ class HomePage extends StatelessWidget {
       color: Color(0xFF42A5F5),
       bg: Color(0xFFBBDEFB),
       image: 'assets/images/carouselbus.gif',
-      page: AnimalPage(),
+      page: ColorsPage(),
     ),
   ];
 

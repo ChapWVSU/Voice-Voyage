@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "569575038698",
+    "project_id": "voice-voyage-5212c",
+    "storage_bucket": "voice-voyage-5212c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:569575038698:android:217b3646d35800d43b0193",
+        "android_client_info": {
+          "package_name": "com.bhniben.voicevoyage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzwk-h2l-AiPILvAk17iX2BFVs2YS11us"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

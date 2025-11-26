@@ -7,7 +7,7 @@ class AnimalPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Animals')),
-      body: const Center(child: Text('nimal')),
+      body: const Center(child: Text('Animal')),
     );
   }
 }

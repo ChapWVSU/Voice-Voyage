@@ -5,8 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'login.dart';
-// import 'signup.dart';
-import 'signup_test.dart';
+import 'signup.dart';
 import 'app_colors.dart';
 import 'homepage.dart';
 // ↓↓↓↓ PREV VOID MAIN ↓↓↓↓

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'gameplay.dart';
 
 class AnimalPage extends StatelessWidget {
   const AnimalPage({super.key});
@@ -110,29 +111,41 @@ class AnimalPage extends StatelessWidget {
                       const SizedBox(width: 40),
 
                       // Card 1 -> uses asset GIF
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/1.png',
                         bannerText: "Animals",
                         title: "The Farm Animals",
                         subtitle: "Level 1: Know the Farm Animals",
+                        levelNumber: 1,
+                        targetWord: "Cow",
+                        prompt: "Can you name this farm animal?",
                       ),
                       const SizedBox(width: 25),
 
                       // Card 2
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/2.1.png',
                         bannerText: "Animals",
                         title: "The Wild Animals",
                         subtitle: "Level 2: Discover the jungle",
+                        levelNumber: 2,
+                        targetWord: "Lion",
+                        prompt: "Can you name this wild animal?",
                       ),
                       const SizedBox(width: 25),
 
                       // Card 3
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/3.png',
                         bannerText: "Animals",
-                        title: "Let’s Differerntiate",
+                        title: "Let's Differerntiate",
                         subtitle: "Level 3: Do i know the animal?",
+                        levelNumber: 3,
+                        targetWord: "Animal",
+                        prompt: "Can you identify this animal?",
                       ),
                       const SizedBox(width: 20),
                     ],
@@ -142,6 +155,42 @@ class AnimalPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Tappable card that navigates to GameplayScreen
+  Widget _buildTappableCard(
+    BuildContext context, {
+    required String assetImagePath,
+    required String bannerText,
+    required String title,
+    required String subtitle,
+    required int levelNumber,
+    required String targetWord,
+    required String prompt,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameplayScreen(
+              levelNumber: levelNumber,
+              targetWord: targetWord,
+              prompt: prompt,
+              backgroundImagePath: 'assets/images/1.png',
+              characterImagePath: 'assets/images/1.png',
+              currentStars: 0,
+            ),
+          ),
+        );
+      },
+      child: _greetingCard(
+        assetImagePath: assetImagePath,
+        bannerText: bannerText,
+        title: title,
+        subtitle: subtitle,
       ),
     );
   }
@@ -192,7 +241,11 @@ class AnimalPage extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
-                            Icon(Icons.broken_image, size: 36, color: Colors.grey),
+                            Icon(
+                              Icons.broken_image,
+                              size: 36,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 6),
                             Text(
                               'Image not found',

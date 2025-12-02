@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'gameplay.dart';
 
 class BasicGreetingsPage extends StatelessWidget {
   const BasicGreetingsPage({super.key});
@@ -110,29 +111,44 @@ class BasicGreetingsPage extends StatelessWidget {
                       const SizedBox(width: 40),
 
                       // Card 1 -> uses asset GIF
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/Hello.gif',
                         bannerText: "Basic Greetings",
-                        title: "Let’s Greet!",
+                        title: "Let's Greet!",
                         subtitle: "Level 1: The basics of greeting",
+                        levelNumber: 1,
+                        targetWord: "Hello",
+                        prompt: "Can you say 'Hello' to your friend?",
                       ),
                       const SizedBox(width: 25),
 
                       // Card 2
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/Helloo.gif',
                         bannerText: "Basic Greetings",
                         title: "How to Greet Your Parents?",
                         subtitle: "Level 2: Greeting your parents",
+                        levelNumber: 2,
+                        targetWord: "Good morning, Mom and Dad",
+                        prompt:
+                            "Can you greet your parents with 'Good morning, Mom and Dad'?",
                       ),
                       const SizedBox(width: 25),
 
                       // Card 3
-                      _greetingCard(
+                      _buildTappableCard(
+                        context,
                         assetImagePath: 'assets/images/bus.gif',
                         bannerText: "Basic Greetings",
                         title: "How to Greet in School?",
-                        subtitle: "Level 3: Let’s greet your teacher and friends",
+                        subtitle:
+                            "Level 3: Let's greet your teacher and friends",
+                        levelNumber: 3,
+                        targetWord: "Hello everyone",
+                        prompt:
+                            "Can you greet your class with 'Hello everyone'?",
                       ),
                       const SizedBox(width: 20),
                     ],
@@ -142,6 +158,42 @@ class BasicGreetingsPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Tappable card that navigates to GameplayScreen
+  Widget _buildTappableCard(
+    BuildContext context, {
+    required String assetImagePath,
+    required String bannerText,
+    required String title,
+    required String subtitle,
+    required int levelNumber,
+    required String targetWord,
+    required String prompt,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameplayScreen(
+              levelNumber: levelNumber,
+              targetWord: targetWord,
+              prompt: prompt,
+              backgroundImagePath: 'assets/images/Hello.gif',
+              characterImagePath: 'assets/images/Hello.gif',
+              currentStars: 0,
+            ),
+          ),
+        );
+      },
+      child: _greetingCard(
+        assetImagePath: assetImagePath,
+        bannerText: bannerText,
+        title: title,
+        subtitle: subtitle,
       ),
     );
   }
@@ -192,7 +244,11 @@ class BasicGreetingsPage extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
-                            Icon(Icons.broken_image, size: 36, color: Colors.grey),
+                            Icon(
+                              Icons.broken_image,
+                              size: 36,
+                              color: Colors.grey,
+                            ),
                             SizedBox(height: 6),
                             Text(
                               'Image not found',

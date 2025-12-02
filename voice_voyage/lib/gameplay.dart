@@ -208,7 +208,7 @@ class _GameplayScreenState extends State<GameplayScreen>
                         child: Text(
                           widget.prompt,
                           style: const TextStyle(
-                            fontSize: 50,
+                            fontSize: 25,
                             fontWeight: FontWeight.w900,
                             color: Color.fromARGB(221, 0, 0, 0),
                             height: 1.3,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_colors.dart';
 // import 'homepage.dart';
 
@@ -65,11 +66,18 @@ class _LoginPageState extends State<LoginPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        // Login successful
+        // Login successful - save user session
+        final userId = querySnapshot.docs[0].id;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId);
+        await prefs.setString('userEmail', email);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        Navigator.pushReplacementNamed(context, '/profile');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/profile');
+        }
       } else {
         // No matching credentials found
         ScaffoldMessenger.of(context).showSnackBar(

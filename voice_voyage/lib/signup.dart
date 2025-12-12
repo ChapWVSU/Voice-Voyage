@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_colors.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -65,18 +66,25 @@ class _SignUpPageState extends State<SignUpPage> {
       }
 
       // Add new user to Firestore "users" collection
-      await _firestore.collection('users').add({
+      final userDocRef = await _firestore.collection('users').add({
         'email': email,
         'password': password, // For production, never store plaintext passwords
         'created_at': FieldValue.serverTimestamp(),
       });
 
+      // Save user ID to SharedPreferences for session management
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userId', userDocRef.id);
+      await prefs.setString('userEmail', email);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Account created successfully!')),
       );
 
-      // Navigate to homepage after signup
-      Navigator.pushNamed(context, '/profile');
+      // Navigate to profile creation after signup
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/profile');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),

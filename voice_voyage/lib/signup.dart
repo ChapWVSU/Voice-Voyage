@@ -76,7 +76,7 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       // Navigate to homepage after signup
-      Navigator.pushNamed(context, '/homepage');
+      Navigator.pushNamed(context, '/profile');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),

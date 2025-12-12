@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 
 import 'login.dart';
 import 'signup.dart';
+import 'profile.dart';
 import 'app_colors.dart';
 import 'homepage.dart';
 // ↓↓↓↓ PREV VOID MAIN ↓↓↓↓
@@ -54,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/homepage': (context) => const HomePage(),
+        '/profile': (context) => const ProfilePage(),
       },
     );
   }

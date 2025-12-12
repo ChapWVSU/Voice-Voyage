@@ -104,40 +104,47 @@ class HomePage extends StatelessWidget {
 class _Header extends StatelessWidget {
   const _Header();
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          _IconBox(
+@override
+Widget build(BuildContext context) {
+  return Padding(
+    padding: const EdgeInsets.all(16),
+    child: Row(
+      children: [
+        // Making the sun image clickable using GestureDetector
+        GestureDetector(
+          onTap: () {
+            // Navigate back to the profile page when the sun image is clicked
+            Navigator.pushReplacementNamed(context, '/profile');
+          },
+          child: _IconBox(
             color: const Color(0xFF00BCD4),
-            child: Image.asset('assets/images/head sun.png'),
+            child: Image.asset('assets/images/head sun.png'), // Sun Image
           ),
-          const Spacer(),
-          const Text(
-            'Basic Speech',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
+        ),
+        const Spacer(),
+        const Text(
+          'Basic Speech',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
           ),
-          const Icon(Icons.arrow_drop_down, color: Colors.white, size: 28),
-          const Spacer(),
-          _IconBox(
-            color: Colors.white24,
-            child: const Icon(Icons.search, color: Colors.white),
-          ),
-          const SizedBox(width: 12),
-          _IconBox(
-            color: Colors.white24,
-            child: const Icon(Icons.menu, color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+        const Icon(Icons.arrow_drop_down, color: Colors.white, size: 28),
+        const Spacer(),
+        _IconBox(
+          color: Colors.white24,
+          child: const Icon(Icons.search, color: Colors.white),
+        ),
+        const SizedBox(width: 12),
+        _IconBox(
+          color: Colors.white24,
+          child: const Icon(Icons.menu, color: Colors.white),
+        ),
+      ],
+    ),
+  );
+}
 }
 
 // -------------------- Icon Box --------------------

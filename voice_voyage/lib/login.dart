@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        Navigator.pushReplacementNamed(context, '/homepage');
+        Navigator.pushReplacementNamed(context, '/profile');
       } else {
         // No matching credentials found
         ScaffoldMessenger.of(context).showSnackBar(

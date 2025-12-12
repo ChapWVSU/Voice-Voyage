@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'profile_helper.dart';
+import 'edit_profile.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -14,6 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _userId;
   bool _isLoading = true;
   String? _selectedProfileId;
+  bool _isEditMode = false;
 
   @override
   void initState() {
@@ -173,6 +175,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _showProfileOptions() {
+    setState(() => _isEditMode = !_isEditMode);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,9 +202,7 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
               icon: const Icon(Icons.edit, color: Colors.black),
-              onPressed: () {
-                // Edit profile functionality will be added later
-              },
+              onPressed: _showProfileOptions,
             ),
           ),
         ],
@@ -259,100 +263,189 @@ class _ProfilePageState extends State<ProfilePage> {
                             ..._profiles.map((profile) {
                               return GestureDetector(
                                 onTap: () {
-                                  // Track selected profile and navigate to homepage
-                                  setState(() => _selectedProfileId = profile['id']);
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    '/homepage',
-                                    arguments: {'profileId': profile['id'], 'profileName': profile['name']},
-                                  );
-                                },
-                                onLongPress: () async {
-                                  // Long press to delete
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Delete Profile'),
-                                        content: const Text('Are you sure you want to delete this profile?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, false),
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context, true),
-                                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-
-                                  if (confirm == true) {
-                                    try {
-                                      await ProfileHelper.deleteProfile(profile['id']);
-                                      _loadProfiles();
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Profile deleted')),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Error deleting profile: $e')),
-                                        );
-                                      }
-                                    }
+                                  if (!_isEditMode) {
+                                    // Track selected profile and navigate to homepage
+                                    setState(() => _selectedProfileId = profile['id']);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      '/homepage',
+                                      arguments: {'profileId': profile['id'], 'profileName': profile['name']},
+                                    );
                                   }
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                  child: Stack(
                                     children: [
-                                      Container(
-                                        height: 140,
-                                        width: 140,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(20),
-                                          child: Image.asset(
-                                            profile['avatar'] ?? 'assets/images/prof.png',
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.blue,
-                                                child: const Icon(
-                                                  Icons.person,
-                                                  size: 60,
-                                                  color: Colors.white,
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 140,
+                                            width: 140,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(20),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 8,
+                                                  offset: const Offset(0, 4),
                                                 ),
-                                              );
-                                            },
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(20),
+                                              child: Image.asset(
+                                                profile['avatar'] ?? 'assets/images/prof.png',
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: Colors.blue,
+                                                    child: const Icon(
+                                                      Icons.person,
+                                                      size: 60,
+                                                      color: Colors.white,
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          SizedBox(
+                                            width: 140, // same as avatar width
+                                            child: Text(
+                                              profile['name'] ?? 'Unknown',
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      if (_isEditMode)
+                                        Positioned(
+                                          left: 0,
+                                          right: 0,
+                                          top: 0,
+                                          bottom: 0,
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  // Delete button (top-left)
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      final confirm = await showDialog<bool>(
+                                                        context: context,
+                                                        builder: (BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: const Text('Delete Profile'),
+                                                            content: const Text('Are you sure you want to delete this profile?'),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(context, false),
+                                                                child: const Text('Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(context, true),
+                                                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+
+                                                      if (confirm == true) {
+                                                        try {
+                                                          await ProfileHelper.deleteProfile(profile['id']);
+                                                          setState(() => _isEditMode = false);
+                                                          await _loadProfiles();
+                                                          if (mounted) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              const SnackBar(content: Text('Profile deleted')),
+                                                            );
+                                                          }
+                                                        } catch (e) {
+                                                          if (mounted) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              SnackBar(content: Text('Error deleting profile: $e')),
+                                                            );
+                                                          }
+                                                        }
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.red,
+                                                        shape: BoxShape.circle,
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.black.withOpacity(0.3),
+                                                            blurRadius: 4,
+                                                            offset: const Offset(0, 2),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      padding: const EdgeInsets.all(8),
+                                                      child: const Icon(
+                                                        Icons.delete,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Edit button (top-right)
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      final result = await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => EditProfilePage(
+                                                            profileId: profile['id'],
+                                                            profileName: profile['name'],
+                                                            profileAvatar: profile['avatar'],
+                                                          ),
+                                                        ),
+                                                      );
+
+                                                      if (result == true) {
+                                                        setState(() => _isEditMode = false);
+                                                        await _loadProfiles();
+                                                      }
+                                                    },
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.orange,
+                                                        shape: BoxShape.circle,
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: Colors.black.withOpacity(0.3),
+                                                            blurRadius: 4,
+                                                            offset: const Offset(0, 2),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      padding: const EdgeInsets.all(8),
+                                                      child: const Icon(
+                                                        Icons.edit,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        profile['name'] ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
                                     ],
                                   ),
                                 ),

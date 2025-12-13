@@ -1,12 +1,20 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class GameplayScreen extends StatefulWidget {
   final int levelNumber;
-  final String targetWord; // e.g., "Hello"
-  final String prompt; // e.g., "Can you say \"Hello\" to your friend?"
-  final String backgroundImagePath; // Path to your background PNG
-  final String characterImagePath; // Path to your character PNG
-  final int currentStars; // User's current rating/stars
+  final String targetWord; // kept for compatibility (not used)
+  final String prompt; // kept for compatibility (not used)
+  final String backgroundImagePath;
+  final String characterImagePath;
+  final int currentStars;
 
   const GameplayScreen({
     Key? key,
@@ -14,7 +22,7 @@ class GameplayScreen extends StatefulWidget {
     required this.targetWord,
     required this.prompt,
     required this.backgroundImagePath,
-    required this.characterImagePath, // if may characters
+    required this.characterImagePath,
     required this.currentStars,
   }) : super(key: key);
 
@@ -22,21 +30,76 @@ class GameplayScreen extends StatefulWidget {
   State<GameplayScreen> createState() => _GameplayScreenState();
 }
 
+class _PhraseStep {
+  final String referenceText; // what Azure grades against
+  final String promptText; // what you show on screen
+  final String successMessage;
+
+  const _PhraseStep({
+    required this.referenceText,
+    required this.promptText,
+    required this.successMessage,
+  });
+}
+
 class _GameplayScreenState extends State<GameplayScreen>
     with SingleTickerProviderStateMixin {
+  // UI state
   bool isRecording = false;
   bool showFeedback = false;
-  String feedbackMessage = "";
+  bool showLevelComplete = false;
   bool isCorrect = false;
+  String feedbackMessage = "";
 
+  // Animation
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // Recorder
+  late FlutterSoundRecorder _recorder;
+  bool _recorderReady = false;
+  String? _audioFilePath;
+
+  // Azure
+  static const String _speechKey =
+      "7iyT7N6LiE2S99igEjCvt3NHZEy8xCfPsxQLzN60sZcEqGn4F5HKJQQJ99BKAC3pKaRXJ3w3AAAYACOGzpew";
+  static const String _region = "eastasia";
+  static const String _language = "en-US";
+
+  // Scores (shown in UI)
+  double accuracyScore = 0.0;
+  double fluencyScore = 0.0;
+  double pronScore = 0.0;
+
+  // User name
+  final String userName = "Bensoy";
+
+  // Level script (3 phrases)
+  final List<_PhraseStep> _steps = const [
+    _PhraseStep(
+      referenceText: "Hello",
+      promptText: "Can you say “Hello” to your friend?",
+      successMessage: "Very Good, Bensoy!",
+    ),
+    _PhraseStep(
+      referenceText: "Hello friend",
+      promptText: "Can you say “Hello friend”?",
+      successMessage: "Well done, Bensoy!",
+    ),
+    _PhraseStep(
+      referenceText: "Hello friend, how are you?",
+      promptText: "Can you say “Hello friend, how are you?”",
+      successMessage: "You’re amazing, Bensoy!",
+    ),
+  ];
+  int _stepIndex = 0;
+
+  _PhraseStep get _currentStep => _steps[_stepIndex];
 
   @override
   void initState() {
     super.initState();
 
-    // Animation for microphone button pulse effect
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -45,99 +108,267 @@ class _GameplayScreenState extends State<GameplayScreen>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _recorder = FlutterSoundRecorder();
+    _initializeRecorder();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _recorder.closeRecorder();
     super.dispose();
   }
 
-  // TODO: Initialize speech recognition here
-  void _initializeSpeechRecognition() {
-    // Set up speech recognition package
-    // Configure language (e.g., 'en-US')
-    // Set up listeners
+  Future<void> _initializeRecorder() async {
+    final micStatus = await Permission.microphone.request();
+    if (micStatus != PermissionStatus.granted) {
+      print("❌ Microphone permission denied");
+      return;
+    }
+    await _recorder.openRecorder();
+    _recorderReady = true;
+    print("✅ Recorder ready");
   }
 
-  // TODO: Start recording pronunciation
+  Future<String> _getTempFilePath() async {
+    final dir = await getTemporaryDirectory();
+    return p.join(dir.path, 'rec_${DateTime.now().millisecondsSinceEpoch}.wav');
+  }
+
   void _startRecording() async {
+    if (!_recorderReady || isRecording || showLevelComplete) return;
+
     setState(() {
       isRecording = true;
       showFeedback = false;
     });
 
-    // TODO: Start listening for speech input
-    // Example:
-    // await speechRecognizer.listen();
+    final path = await _getTempFilePath();
+    _audioFilePath = path;
+
+    print("🎙 START recording -> $path");
+    await _recorder.startRecorder(
+      toFile: path,
+      codec: Codec.pcm16WAV,
+      sampleRate: 16000,
+      numChannels: 1,
+    );
   }
 
-  // TODO: Stop recording and analyze pronunciation
   void _stopRecordingAndAnalyze() async {
+    if (!isRecording) return;
+
     setState(() {
       isRecording = false;
     });
 
-    // TODO: Stop listening
-    // await speechRecognizer.stop();
+    await _recorder.stopRecorder();
+    print("⏹️ Recording stopped");
 
-    // TODO: Get the recognized text
-    // String recognizedText = ... ;
+    if (_audioFilePath == null) {
+      _showFeedback(false);
+      return;
+    }
 
-    // TODO: Call your pronunciation analysis function here
-    // Example:
-    // bool pronunciationCorrect = await analyzePronunciation(
-    //   targetWord: widget.targetWord,
-    //   recognizedText: recognizedText,
-    //   audioData: audioData, // if you need audio analysis
-    // );
-
-    // TODO: Calculate accuracy score (0-100)
-    // int accuracyScore = ... ;
-
-    // Mock result for demonstration
-    bool pronunciationCorrect = true; // Replace with actual result
-    int accuracyScore = 85; // Replace with actual score
-
-    _showFeedback(pronunciationCorrect, accuracyScore);
+    await _sendToAzurePronunciationAssessment();
+    await _cleanupAudioFile();
   }
 
-  void _showFeedback(bool correct, int score) {
+  double _readScoreFromNBest(Map<String, dynamic> nBest0, String key) {
+    // Some responses put scores directly on NBest[0]:
+    //   "AccuracyScore": 100.0
+    // Some put them inside:
+    //   "PronunciationAssessment": { "AccuracyScore": 100.0 }
+    final pa = nBest0['PronunciationAssessment'];
+    if (pa is Map && pa[key] != null) {
+      final v = pa[key];
+      if (v is num) return v.toDouble();
+    }
+    final v2 = nBest0[key];
+    if (v2 is num) return v2.toDouble();
+    return 0.0;
+  }
+
+  Future<void> _sendToAzurePronunciationAssessment() async {
+    final path = _audioFilePath;
+    if (path == null) {
+      _showFeedback(false);
+      return;
+    }
+
+    final file = File(path);
+    if (!await file.exists()) {
+      print("❌ Audio file does not exist");
+      _showFeedback(false);
+      return;
+    }
+
+    try {
+      final token = await _getAzureAccessToken();
+      if (token == null) {
+        _showFeedback(false);
+        return;
+      }
+
+      final pronAssessmentJson = jsonEncode({
+        "ReferenceText": _currentStep.referenceText.trim(),
+        "GradingSystem": "HundredMark",
+        "Granularity": "FullText",
+        "Dimension": "Comprehensive",
+      });
+      final pronAssessmentBase64 =
+          base64Encode(utf8.encode(pronAssessmentJson));
+
+      final uri = Uri.parse(
+        "https://$_region.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
+        "?language=$_language&format=detailed&scenario=pronunciation",
+      );
+
+      final response = await http.post(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'audio/wav; codecs=audio/pcm; samplerate=16000',
+          'Pronunciation-Assessment': pronAssessmentBase64,
+          'Accept': 'application/json',
+        },
+        body: await file.readAsBytes(),
+      );
+
+      print("📡 Azure status: ${response.statusCode}");
+      print("📡 Azure body: ${response.body}");
+
+      if (response.statusCode != 200) {
+        if (!mounted) return;
+        setState(() {
+          accuracyScore = 0.0;
+          fluencyScore = 0.0;
+          pronScore = 0.0;
+        });
+        _showFeedback(false);
+        return;
+      }
+
+      final data = jsonDecode(response.body);
+      final List nBest = (data['NBest'] ?? []) as List;
+
+      if (nBest.isEmpty) {
+        if (!mounted) return;
+        setState(() {
+          accuracyScore = 0.0;
+          fluencyScore = 0.0;
+          pronScore = 0.0;
+        });
+        _showFeedback(false);
+        return;
+      }
+
+      final Map<String, dynamic> nBest0 =
+          Map<String, dynamic>.from(nBest[0] as Map);
+
+      final acc = _readScoreFromNBest(nBest0, 'AccuracyScore');
+      final flu = _readScoreFromNBest(nBest0, 'FluencyScore');
+      final pro = _readScoreFromNBest(nBest0, 'PronScore');
+
+      final passed = acc >= 70.0;
+
+      if (!mounted) return;
+      setState(() {
+        accuracyScore = acc;
+        fluencyScore = flu;
+        pronScore = pro;
+      });
+
+      _showFeedback(passed);
+    } catch (e) {
+      print("❌ Error calling Azure: $e");
+      if (!mounted) return;
+      setState(() {
+        accuracyScore = 0.0;
+        fluencyScore = 0.0;
+        pronScore = 0.0;
+      });
+      _showFeedback(false);
+    }
+  }
+
+  Future<String?> _getAzureAccessToken() async {
+    try {
+      final uri = Uri.parse(
+        "https://$_region.api.cognitive.microsoft.com/sts/v1.0/issueToken",
+      );
+      final response = await http.post(
+        uri,
+        headers: {
+          'Ocp-Apim-Subscription-Key': _speechKey,
+          'Content-type': 'application/x-www-form-urlencoded',
+          'Content-Length': '0',
+        },
+      );
+      if (response.statusCode == 200) return response.body.trim();
+      print("❌ Token request failed: ${response.statusCode} ${response.body}");
+      return null;
+    } catch (e) {
+      print("❌ Error getting token: $e");
+      return null;
+    }
+  }
+
+  Future<void> _cleanupAudioFile() async {
+    final path = _audioFilePath;
+    _audioFilePath = null;
+    if (path == null) return;
+    try {
+      final f = File(path);
+      if (await f.exists()) {
+        await f.delete();
+        print("🗑️ Temp audio deleted");
+      }
+    } catch (e) {
+      print("Cleanup error: $e");
+    }
+  }
+
+  void _showFeedback(bool correct) {
+    if (!mounted) return;
+
     setState(() {
       isCorrect = correct;
       showFeedback = true;
-
-      if (correct) {
-        if (score >= 90) {
-          feedbackMessage = "Perfect! 🌟";
-        } else if (score >= 75) {
-          feedbackMessage = "Great job! 👏";
-        } else {
-          feedbackMessage = "Good try! 😊";
-        }
-      } else {
-        feedbackMessage = "Try again! 💪";
-      }
+      feedbackMessage = correct ? _currentStep.successMessage : "Try again!";
     });
 
-    // TODO: Update user progress/stars in database
-    // if (correct) {
-    //   updateUserProgress(widget.levelNumber, score);
-    // }
-
-    // Auto-hide feedback after 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
+      if (!mounted) return;
+
+      setState(() {
+        showFeedback = false;
+      });
+
+      if (!correct) return;
+
+      // Progress to next phrase or finish level
+      if (_stepIndex < _steps.length - 1) {
         setState(() {
-          showFeedback = false;
+          _stepIndex++;
+        });
+      } else {
+        setState(() {
+          showLevelComplete = true;
         });
       }
     });
   }
 
   void _playPromptAudio() {
-    // TODO: Play audio of the prompt/word
-    // Example: audioPlayer.play('assets/audio/${widget.targetWord}.mp3');
+    // Hook your TTS/audio here
+    print('🔊 Play: "${_currentStep.referenceText}"');
+  }
+
+  void _onLevelCompleteOkay() {
+    if (!mounted) return;
+    Navigator.pop(context);
   }
 
   @override
@@ -145,22 +376,18 @@ class _GameplayScreenState extends State<GameplayScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(widget.backgroundImagePath, fit: BoxFit.cover),
           ),
 
-          // Main Content
           SafeArea(
             child: Column(
               children: [
-                // Top Bar
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Back Button
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -174,10 +401,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                           ],
                         ),
                         child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.black87,
-                          ),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Colors.black87),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
@@ -187,7 +412,6 @@ class _GameplayScreenState extends State<GameplayScreen>
 
                 const SizedBox(height: 20),
 
-                // Prompt Text
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 24),
                   padding: const EdgeInsets.all(20),
@@ -202,53 +426,33 @@ class _GameplayScreenState extends State<GameplayScreen>
                       ),
                     ],
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.prompt,
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w900,
-                            color: Color.fromARGB(221, 0, 0, 0),
-                            height: 1.3,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    showLevelComplete ? "Level Complete!" : _currentStep.promptText,
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                      color: Color.fromARGB(221, 0, 0, 0),
+                      height: 1.3,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
 
                 const Spacer(),
-
-                // Character Image
-                // Image.asset(
-                //   widget.characterImagePath,
-                //   height: 280,
-                //   fit: BoxFit.contain,
-                // ),
                 const Spacer(),
 
-                // Control Buttons
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 40,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Play Button (prompt audio)
                       _buildControlButton(
                         icon: Icons.play_arrow,
                         color: Colors.green,
                         onPressed: _playPromptAudio,
                       ),
-
                       const SizedBox(width: 40),
-
-                      // Microphone Button
                       GestureDetector(
                         onTapDown: (_) => _startRecording(),
                         onTapUp: (_) => _stopRecordingAndAnalyze(),
@@ -262,17 +466,14 @@ class _GameplayScreenState extends State<GameplayScreen>
                                 width: 80,
                                 height: 80,
                                 decoration: BoxDecoration(
-                                  color: isRecording
-                                      ? Colors.red
-                                      : Colors.white,
+                                  color: isRecording ? Colors.red : Colors.white,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          (isRecording
-                                                  ? Colors.red
-                                                  : Colors.grey)
-                                              .withOpacity(0.3),
+                                      color: (isRecording
+                                              ? Colors.red
+                                              : Colors.grey)
+                                          .withOpacity(0.3),
                                       blurRadius: 15,
                                       spreadRadius: 2,
                                     ),
@@ -334,6 +535,82 @@ class _GameplayScreenState extends State<GameplayScreen>
                             color: Colors.black87,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Accuracy: ${accuracyScore.toStringAsFixed(1)}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Level Complete Overlay
+          if (showLevelComplete)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, size: 80, color: Colors.orange),
+                        const SizedBox(height: 16),
+                        Text(
+                          "Lvl ${widget.levelNumber} complete",
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Good job, $userName!",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Reward: 10 candies",
+                          style: TextStyle(fontSize: 18, color: Colors.purple),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _onLevelCompleteOkay,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            "Okay",
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
                         ),
                       ],
                     ),

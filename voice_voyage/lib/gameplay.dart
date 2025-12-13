@@ -61,8 +61,8 @@ class _GameplayScreenState extends State<GameplayScreen>
   String? _audioFilePath;
 
   // Azure
-  static const String _speechKey = "YOUR_AZURE_SPEECH_KEY_HERE";
-
+  static const String _speechKey =
+      "replace_with_your_own_key";
   static const String _region = "eastasia";
   static const String _language = "en-US";
 

@@ -62,9 +62,9 @@ class _GameplayScreenState extends State<GameplayScreen>
 
   // Azure
   static const String _speechKey =
-      "replace_with_your_own_key";
-  static const String _region = "";
-  static const String _language = "";
+      "7iyT7N6LiE2S99igEjCvt3NHZEy8xCfPsxQLzN60sZcEqGn4F5HKJQQJ99BKAC3pKaRXJ3w3AAAYACOGzpew";
+  static const String _region = "eastasia";
+  static const String _language = "en-US";
 
   // Scores (shown in UI)
   double accuracyScore = 0.0;

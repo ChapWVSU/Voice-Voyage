@@ -76,4 +76,58 @@ class ProfileHelper {
       return null;
     }
   }
+
+  /// Save progress (score) for a specific profile, category and level.
+  /// Document id format: `<category>-level<levelNumber>` (e.g. greetings-level1)
+  static Future<void> saveProgress({
+    required String profileId,
+    required String category,
+    required int level,
+    required double score,
+  }) async {
+    try {
+      final docId = '${profileId}_${category.toLowerCase()}_level$level';
+
+      // Write into a dedicated top-level `progress` collection for easier queries
+      final topRef = _firestore.collection('progress').doc(docId);
+      await topRef.set({
+        'profileId': profileId,
+        'category': category,
+        'level': level,
+        'score': score,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // Also keep a copy under the profile document for quick access (backwards compat)
+      final profileRef = _firestore
+          .collection('profiles')
+          .doc(profileId)
+          .collection('progress')
+          .doc('${category.toLowerCase()}-level$level');
+      await profileRef.set({
+        'category': category,
+        'level': level,
+        'score': score,
+        'updated_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving progress: $e');
+      rethrow;
+    }
+  }
+
+  /// Get progress entries for a profile (returns list of progress docs)
+  static Future<List<Map<String, dynamic>>> getProgress(String profileId) async {
+    try {
+      // Query the top-level `progress` collection for entries belonging to this profile
+      final snap = await _firestore
+          .collection('progress')
+          .where('profileId', isEqualTo: profileId)
+          .get();
+      return snap.docs.map((d) => {'id': d.id, ...d.data()}).toList();
+    } catch (e) {
+      print('Error getting progress: $e');
+      return [];
+    }
+  }
 }

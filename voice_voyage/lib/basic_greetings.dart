@@ -185,6 +185,7 @@ class BasicGreetingsPage extends StatelessWidget {
               backgroundImagePath: 'assets/images/Hello.gif',
               characterImagePath: 'assets/images/Hello.gif',
               currentStars: 0,
+              category: 'greetings',
             ),
           ),
         );

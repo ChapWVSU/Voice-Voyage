@@ -182,6 +182,7 @@ class AnimalPage extends StatelessWidget {
               backgroundImagePath: 'assets/images/1.png',
               characterImagePath: 'assets/images/1.png',
               currentStars: 0,
+              category: 'animals',
             ),
           ),
         );

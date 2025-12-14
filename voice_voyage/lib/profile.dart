@@ -265,12 +265,19 @@ class _ProfilePageState extends State<ProfilePage> {
                                 onTap: () {
                                   if (!_isEditMode) {
                                     // Track selected profile and navigate to homepage
-                                    setState(() => _selectedProfileId = profile['id']);
-                                    Navigator.pushReplacementNamed(
-                                      context,
-                                      '/homepage',
-                                      arguments: {'profileId': profile['id'], 'profileName': profile['name']},
-                                    );
+                                      setState(() => _selectedProfileId = profile['id']);
+                                      // persist selected profile for other pages (gameplay) to read
+                                      SharedPreferences.getInstance().then((prefs) async {
+                                        await prefs.setString('selectedProfileId', profile['id']);
+                                        await prefs.setString('selectedProfileName', profile['name'] ?? '');
+                                        if (mounted) {
+                                          Navigator.pushReplacementNamed(
+                                            context,
+                                            '/homepage',
+                                            arguments: {'profileId': profile['id'], 'profileName': profile['name']},
+                                          );
+                                        }
+                                      });
                                   }
                                 },
                                 child: Padding(

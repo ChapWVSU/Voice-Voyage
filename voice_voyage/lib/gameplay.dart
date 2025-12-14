@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'profile_helper.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
@@ -15,6 +17,7 @@ class GameplayScreen extends StatefulWidget {
   final String backgroundImagePath;
   final String characterImagePath;
   final int currentStars;
+  final String category; // e.g. 'greetings', 'animals'
 
   const GameplayScreen({
     Key? key,
@@ -24,6 +27,7 @@ class GameplayScreen extends StatefulWidget {
     required this.backgroundImagePath,
     required this.characterImagePath,
     required this.currentStars,
+    required this.category,
   }) : super(key: key);
 
   @override
@@ -357,8 +361,32 @@ class _GameplayScreenState extends State<GameplayScreen>
         setState(() {
           showLevelComplete = true;
         });
+        // Save progress for this level (non-blocking)
+        _saveProgress();
       }
     });
+  }
+
+  Future<void> _saveProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final profileId = prefs.getString('selectedProfileId');
+      if (profileId == null) {
+        print('No selectedProfileId found; skipping saveProgress');
+        return;
+      }
+
+      // Use accuracyScore as the metric to store
+      await ProfileHelper.saveProgress(
+        profileId: profileId,
+        category: widget.category,
+        level: widget.levelNumber,
+        score: accuracyScore,
+      );
+      print('Progress saved: $profileId ${widget.category} level ${widget.levelNumber} -> ${accuracyScore}');
+    } catch (e) {
+      print('Error saving progress in gameplay: $e');
+    }
   }
 
   void _playPromptAudio() {

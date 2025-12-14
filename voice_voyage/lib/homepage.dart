@@ -119,8 +119,16 @@ class _HomePageState extends State<HomePage> {
               _progressTile('Colors', 'colors'),
               const Spacer(),
               ListTile(
-                title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                trailing: const Icon(Icons.logout, color: Colors.red),
+                contentPadding: const EdgeInsets.only(right: 0),
+                title: const SizedBox.shrink(),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.logout, color: Colors.red),
+                  ],
+                ),
                 onTap: () async {
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.remove('userId');
@@ -138,22 +146,32 @@ class _HomePageState extends State<HomePage> {
 
   Widget _progressTile(String title, String key) {
     final pct = (_categoryProgress[key] ?? 0.0).clamp(0.0, 1.0);
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context); // close drawer
-        if (key == 'greetings') Navigator.push(context, MaterialPageRoute(builder: (_) => BasicGreetingsPage()));
-        if (key == 'animals') Navigator.push(context, MaterialPageRoute(builder: (_) => AnimalPage()));
-        if (key == 'colors') Navigator.push(context, MaterialPageRoute(builder: (_) => ColorsPage()));
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          LinearProgressIndicator(value: pct, minHeight: 10),
-          const SizedBox(height: 6),
-          Text('${(pct * 100).toStringAsFixed(0)}%'),
-        ],
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.pop(context); // close drawer
+            if (key == 'greetings') Navigator.push(context, MaterialPageRoute(builder: (_) => BasicGreetingsPage()));
+            if (key == 'animals') Navigator.push(context, MaterialPageRoute(builder: (_) => AnimalPage()));
+            if (key == 'colors') Navigator.push(context, MaterialPageRoute(builder: (_) => ColorsPage()));
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(value: pct, minHeight: 10),
+                const SizedBox(height: 6),
+                Text('${(pct * 100).toStringAsFixed(0)}%'),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -194,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index, _) =>
                             CategoryCard(category: categories[index]),
                         options: CarouselOptions(
-                          height: 360,
+                          height: 300,
                           enlargeCenterPage: true,
                           viewportFraction: 0.58,
                           enableInfiniteScroll: false,
@@ -356,20 +374,22 @@ class CategoryCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // fixed height image area so carousel can size consistently
-              Container(
-                height: 220,
-                decoration: BoxDecoration(
-                  color: category.bg,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    category.image,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+              // image area: allow it to flex/shrink to available space
+              Flexible(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: category.bg,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      category.image,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
                   ),
                 ),
               ),

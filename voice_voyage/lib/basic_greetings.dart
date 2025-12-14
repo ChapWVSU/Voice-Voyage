@@ -130,7 +130,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                                 itemBuilder: (context, index, realIndex) {
                                   final items = [
                                     _buildTappableCard(
-                                      context,
+                                      context: context,
                                       assetImagePath: 'assets/images/Hello.gif',
                                       bannerText: "Basic Greetings",
                                       title: "Let's Greet!",
@@ -140,7 +140,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                                       prompt: "Can you say 'Hello' to your friend?",
                                     ),
                                     _buildTappableCard(
-                                      context,
+                                      context: context,
                                       assetImagePath: 'assets/images/Helloo.gif',
                                       bannerText: "Basic Greetings",
                                       title: "How to Greet Your Parents?",
@@ -150,7 +150,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                                       prompt: "Can you greet your parents with 'Good morning, Mom and Dad'?",
                                     ),
                                     _buildTappableCard(
-                                      context,
+                                      context: context,
                                       assetImagePath: 'assets/images/bus.gif',
                                       bannerText: "Basic Greetings",
                                       title: "How to Greet in School?",
@@ -204,8 +204,8 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
   }
 
   // Tappable card that navigates to GameplayScreen
-  Widget _buildTappableCard(
-    BuildContext context, {
+  Widget _buildTappableCard({
+    required BuildContext context,
     required String assetImagePath,
     required String bannerText,
     required String title,
@@ -214,32 +214,28 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
     required String targetWord,
     required String prompt,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GameplayScreen(
-                levelNumber: levelNumber,
-                targetWord: targetWord,
-                prompt: prompt,
-                backgroundImagePath: 'assets/images/Hello.gif',
-                characterImagePath: 'assets/images/Hello.gif',
-                currentStars: 0,
-                category: 'greetings',
-              ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameplayScreen(
+              levelNumber: levelNumber,
+              targetWord: targetWord,
+              prompt: prompt,
+              backgroundImagePath: 'assets/images/Hello.gif',
+              characterImagePath: 'assets/images/Hello.gif',
+              currentStars: 0,
+              category: 'greetings',
             ),
-          );
-        },
-        child: _greetingCard(
-          assetImagePath: assetImagePath,
-          bannerText: bannerText,
-          title: title,
-          subtitle: subtitle,
-        ),
+          ),
+        );
+      },
+      child: _greetingCard(
+        assetImagePath: assetImagePath,
+        bannerText: bannerText,
+        title: title,
+        subtitle: subtitle,
       ),
     );
   }
@@ -278,7 +274,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                   ),
                   child: Image.asset(
                     assetImagePath,
-                    height: 240,
+                    height: 200,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
@@ -332,7 +328,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           // Title
           Text(
@@ -344,7 +340,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
 
           // Subtitle
           Text(
@@ -356,7 +352,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'gameplay.dart';
 
 class ColorsPage extends StatefulWidget {
@@ -9,12 +10,10 @@ class ColorsPage extends StatefulWidget {
 }
 
 class _ColorsPageState extends State<ColorsPage> {
-  final PageController _pageController = PageController(viewportFraction: 0.8);
   int _currentPage = 0;
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -121,17 +120,15 @@ class _ColorsPageState extends State<ColorsPage> {
 
                     Expanded(
                       child: Column(
-                        children: [
-                          Flexible(
-                            child: PageView(
-                              physics: const BouncingScrollPhysics(),
-                              controller: _pageController,
-                              onPageChanged: (i) => setState(() => _currentPage = i),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
+                          children: [
+                            SizedBox(
+                              height: 360,
+                              child: CarouselSlider.builder(
+                              itemCount: 3,
+                              itemBuilder: (context, index, realIndex) {
+                                final items = [
+                                  _buildTappableCard(
+                                    context: context,
                                     assetImagePath: 'assets/images/1.png',
                                     bannerText: "Animals",
                                     title: "The First Three Colors",
@@ -140,11 +137,8 @@ class _ColorsPageState extends State<ColorsPage> {
                                     targetWord: "",
                                     prompt: "",
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
+                                  _buildTappableCard(
+                                    context: context,
                                     assetImagePath: 'assets/images/2.1.png',
                                     bannerText: "Animals",
                                     title: "Color Combination!",
@@ -153,21 +147,29 @@ class _ColorsPageState extends State<ColorsPage> {
                                     targetWord: "",
                                     prompt: "",
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
+                                  _buildTappableCard(
+                                    context: context,
                                     assetImagePath: 'assets/images/3.png',
                                     bannerText: "Animals",
-                                    title: "Let’s Differerntiate",
+                                    title: "Let's Differerntiate",
                                     subtitle: "Level 3: Do i know the animal?",
                                     levelNumber: 3,
                                     targetWord: "",
                                     prompt: "",
                                   ),
-                                ),
-                              ],
+                                ];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: items[index],
+                                );
+                              },
+                              options: CarouselOptions(
+                                height: 360,
+                                viewportFraction: 0.85,
+                                enableInfiniteScroll: false,
+                                enlargeCenterPage: true,
+                                onPageChanged: (i, reason) => setState(() => _currentPage = i),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -207,7 +209,7 @@ class _ColorsPageState extends State<ColorsPage> {
     required String subtitle,
   }) {
     return SizedBox(
-      width: 300,
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -233,7 +235,7 @@ class _ColorsPageState extends State<ColorsPage> {
                   ),
                   child: Image.asset(
                     assetImagePath,
-                    height: 260,
+                    height: 185,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
@@ -283,7 +285,7 @@ class _ColorsPageState extends State<ColorsPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           // Title
           Text(
@@ -295,7 +297,7 @@ class _ColorsPageState extends State<ColorsPage> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
 
           // Subtitle
           Text(
@@ -307,15 +309,15 @@ class _ColorsPageState extends State<ColorsPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
         ],
       ),
     );
   }
 
   // Tappable card that navigates to GameplayScreen (moved out of build)
-  Widget _buildTappableCard(
-    BuildContext context, {
+  Widget _buildTappableCard({
+    required BuildContext context,
     required String assetImagePath,
     required String bannerText,
     required String title,

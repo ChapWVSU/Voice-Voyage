@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'gameplay.dart';
 
 class AnimalPage extends StatefulWidget {
@@ -9,12 +10,10 @@ class AnimalPage extends StatefulWidget {
 }
 
 class _AnimalPageState extends State<AnimalPage> {
-  final PageController _pageController = PageController(viewportFraction: 0.8);
   int _currentPage = 0;
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -121,55 +120,58 @@ class _AnimalPageState extends State<AnimalPage> {
 
                     Expanded(
                       child: Column(
-                        children: [
-                          Flexible(
-                            child: PageView(
-                              physics: const BouncingScrollPhysics(),
-                              controller: _pageController,
-                              onPageChanged: (i) => setState(() => _currentPage = i),
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
-                                    assetImagePath: 'assets/images/1.png',
-                                    bannerText: "Animals",
-                                    title: "The Farm Animals",
-                                    subtitle: "Level 1: Know the Farm Animals",
-                                    levelNumber: 1,
-                                    targetWord: "Cow",
-                                    prompt: "Can you name this farm animal?",
-                                  ),
+                          children: [
+                            SizedBox(
+                              height: 360,
+                              child: CarouselSlider.builder(
+                                itemCount: 3,
+                                itemBuilder: (context, index, realIndex) {
+                                  final items = [
+                                    _buildTappableCard(
+                                      context: context,
+                                      assetImagePath: 'assets/images/1.png',
+                                      bannerText: "Animals",
+                                      title: "The Farm Animals",
+                                      subtitle: "Level 1: Know the Farm Animals",
+                                      levelNumber: 1,
+                                      targetWord: "Cow",
+                                      prompt: "Can you name this farm animal?",
+                                    ),
+                                    _buildTappableCard(
+                                      context: context,
+                                      assetImagePath: 'assets/images/2.1.png',
+                                      bannerText: "Animals",
+                                      title: "The Wild Animals",
+                                      subtitle: "Level 2: Discover the jungle",
+                                      levelNumber: 2,
+                                      targetWord: "Lion",
+                                      prompt: "Can you name this wild animal?",
+                                    ),
+                                    _buildTappableCard(
+                                      context: context,
+                                      assetImagePath: 'assets/images/3.png',
+                                      bannerText: "Animals",
+                                      title: "Let's Differerntiate",
+                                      subtitle: "Level 3: Do i know the animal?",
+                                      levelNumber: 3,
+                                      targetWord: "Animal",
+                                      prompt: "Can you identify this animal?",
+                                    ),
+                                  ];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    child: items[index],
+                                  );
+                                },
+                                options: CarouselOptions(
+                                  height: 360,
+                                  viewportFraction: 0.85,
+                                  enableInfiniteScroll: false,
+                                  enlargeCenterPage: true,
+                                  onPageChanged: (i, reason) => setState(() => _currentPage = i),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
-                                    assetImagePath: 'assets/images/2.1.png',
-                                    bannerText: "Animals",
-                                    title: "The Wild Animals",
-                                    subtitle: "Level 2: Discover the jungle",
-                                    levelNumber: 2,
-                                    targetWord: "Lion",
-                                    prompt: "Can you name this wild animal?",
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                                  child: _buildTappableCard(
-                                    context,
-                                    assetImagePath: 'assets/images/3.png',
-                                    bannerText: "Animals",
-                                    title: "Let's Differerntiate",
-                                    subtitle: "Level 3: Do i know the animal?",
-                                    levelNumber: 3,
-                                    targetWord: "Animal",
-                                    prompt: "Can you identify this animal?",
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -200,8 +202,8 @@ class _AnimalPageState extends State<AnimalPage> {
   }
 
   // Tappable card that navigates to GameplayScreen
-  Widget _buildTappableCard(
-    BuildContext context, {
+  Widget _buildTappableCard({
+    required BuildContext context,
     required String assetImagePath,
     required String bannerText,
     required String title,
@@ -244,7 +246,7 @@ class _AnimalPageState extends State<AnimalPage> {
     required String subtitle,
   }) {
     return SizedBox(
-      width: 300,
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -270,7 +272,7 @@ class _AnimalPageState extends State<AnimalPage> {
                   ),
                   child: Image.asset(
                     assetImagePath,
-                    height: 260,
+                    height: 185,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
@@ -324,7 +326,7 @@ class _AnimalPageState extends State<AnimalPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
 
           // Title
           Text(
@@ -336,7 +338,7 @@ class _AnimalPageState extends State<AnimalPage> {
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
 
           // Subtitle
           Text(
@@ -348,7 +350,7 @@ class _AnimalPageState extends State<AnimalPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
         ],
       ),
     );

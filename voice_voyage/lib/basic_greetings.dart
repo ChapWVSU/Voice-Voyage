@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'gameplay.dart';
 
-class BasicGreetingsPage extends StatelessWidget {
+class BasicGreetingsPage extends StatefulWidget {
   const BasicGreetingsPage({super.key});
+
+  @override
+  State<BasicGreetingsPage> createState() => _BasicGreetingsPageState();
+}
+
+class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,121 +51,149 @@ class BasicGreetingsPage extends StatelessWidget {
               ),
             ),
 
-            // Horizontal scroll area (left content + cards)
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left content column
-                      SizedBox(
-                        width: 330,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left content column
+                    SizedBox(
+                      width: 330,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "3 Level Course",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Let your child learn the basics of greetings, "
+                            "the different types of greetings, and when to use them.",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Level Goals",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Learn how to speak polite greetings in a variety of situations.",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Progress",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Level 1 of 3",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(width: 40),
+
+                    // PageView for the three cards
+                    Expanded(
+                      child: Column(
                           children: [
-                            const Text(
-                              "3 Level Course",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
+                            SizedBox(
+                              height: 360,
+                              child: CarouselSlider.builder(
+                                itemCount: 3,
+                                itemBuilder: (context, index, realIndex) {
+                                  final items = [
+                                    _buildTappableCard(
+                                      context,
+                                      assetImagePath: 'assets/images/Hello.gif',
+                                      bannerText: "Basic Greetings",
+                                      title: "Let's Greet!",
+                                      subtitle: "Level 1: The basics of greeting",
+                                      levelNumber: 1,
+                                      targetWord: "Hello",
+                                      prompt: "Can you say 'Hello' to your friend?",
+                                    ),
+                                    _buildTappableCard(
+                                      context,
+                                      assetImagePath: 'assets/images/Helloo.gif',
+                                      bannerText: "Basic Greetings",
+                                      title: "How to Greet Your Parents?",
+                                      subtitle: "Level 2: Greeting your parents",
+                                      levelNumber: 2,
+                                      targetWord: "Good morning, Mom and Dad",
+                                      prompt: "Can you greet your parents with 'Good morning, Mom and Dad'?",
+                                    ),
+                                    _buildTappableCard(
+                                      context,
+                                      assetImagePath: 'assets/images/bus.gif',
+                                      bannerText: "Basic Greetings",
+                                      title: "How to Greet in School?",
+                                      subtitle: "Level 3: Let's greet your teacher and friends",
+                                      levelNumber: 3,
+                                      targetWord: "Hello everyone",
+                                      prompt: "Can you greet your class with 'Hello everyone'?",
+                                    ),
+                                  ];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    child: items[index],
+                                  );
+                                },
+                                options: CarouselOptions(
+                                  height: 360,
+                                  viewportFraction: 0.85,
+                                  enableInfiniteScroll: false,
+                                  enlargeCenterPage: true,
+                                  onPageChanged: (i, reason) => setState(() => _currentPage = i),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              "Let your child learn the basics of greetings, "
-                              "the different types of greetings, and when to use them.",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              "Level Goals",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              "Learn how to speak polite greetings in a variety of situations.",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              "Progress",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              "Level 1 of 3",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ],
-                        ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(3, (i) {
+                              final active = i == _currentPage;
+                              return Container(
+                                width: active ? 10 : 8,
+                                height: active ? 10 : 8,
+                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                decoration: BoxDecoration(
+                                  color: active ? const Color(0xFF00A5FF) : Colors.grey.shade300,
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
                       ),
-
-                      const SizedBox(width: 40),
-
-                      // Card 1 -> uses asset GIF
-                      _buildTappableCard(
-                        context,
-                        assetImagePath: 'assets/images/Hello.gif',
-                        bannerText: "Basic Greetings",
-                        title: "Let's Greet!",
-                        subtitle: "Level 1: The basics of greeting",
-                        levelNumber: 1,
-                        targetWord: "Hello",
-                        prompt: "Can you say 'Hello' to your friend?",
-                      ),
-                      const SizedBox(width: 25),
-
-                      // Card 2
-                      _buildTappableCard(
-                        context,
-                        assetImagePath: 'assets/images/Helloo.gif',
-                        bannerText: "Basic Greetings",
-                        title: "How to Greet Your Parents?",
-                        subtitle: "Level 2: Greeting your parents",
-                        levelNumber: 2,
-                        targetWord: "Good morning, Mom and Dad",
-                        prompt:
-                            "Can you greet your parents with 'Good morning, Mom and Dad'?",
-                      ),
-                      const SizedBox(width: 25),
-
-                      // Card 3
-                      _buildTappableCard(
-                        context,
-                        assetImagePath: 'assets/images/bus.gif',
-                        bannerText: "Basic Greetings",
-                        title: "How to Greet in School?",
-                        subtitle:
-                            "Level 3: Let's greet your teacher and friends",
-                        levelNumber: 3,
-                        targetWord: "Hello everyone",
-                        prompt:
-                            "Can you greet your class with 'Hello everyone'?",
-                      ),
-                      const SizedBox(width: 20),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -173,28 +214,32 @@ class BasicGreetingsPage extends StatelessWidget {
     required String targetWord,
     required String prompt,
   }) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GameplayScreen(
-              levelNumber: levelNumber,
-              targetWord: targetWord,
-              prompt: prompt,
-              backgroundImagePath: 'assets/images/Hello.gif',
-              characterImagePath: 'assets/images/Hello.gif',
-              currentStars: 0,
-              category: 'greetings',
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GameplayScreen(
+                levelNumber: levelNumber,
+                targetWord: targetWord,
+                prompt: prompt,
+                backgroundImagePath: 'assets/images/Hello.gif',
+                characterImagePath: 'assets/images/Hello.gif',
+                currentStars: 0,
+                category: 'greetings',
+              ),
             ),
-          ),
-        );
-      },
-      child: _greetingCard(
-        assetImagePath: assetImagePath,
-        bannerText: bannerText,
-        title: title,
-        subtitle: subtitle,
+          );
+        },
+        child: _greetingCard(
+          assetImagePath: assetImagePath,
+          bannerText: bannerText,
+          title: title,
+          subtitle: subtitle,
+        ),
       ),
     );
   }
@@ -207,7 +252,7 @@ class BasicGreetingsPage extends StatelessWidget {
     required String subtitle,
   }) {
     return SizedBox(
-      width: 300,
+      width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -233,7 +278,7 @@ class BasicGreetingsPage extends StatelessWidget {
                   ),
                   child: Image.asset(
                     assetImagePath,
-                    height: 150,
+                    height: 240,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {

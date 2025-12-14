@@ -27,13 +27,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
     'assets/images/prof2.png',
     'assets/images/prof3.png',
     'assets/images/prof4.png',
+    'assets/images/prof5.png',
+    'assets/images/prof6.png',
+    'assets/images/prof7.png',
   ];
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.profileName);
-    _selectedAvatar = widget.profileAvatar;
+    _selectedAvatar = ProfileHelper.normalizeAvatarPath(widget.profileAvatar);
   }
 
   @override

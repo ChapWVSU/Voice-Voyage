@@ -194,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.logout_outlined, color: Colors.black),
           onPressed: _handleBackButton,
         ),
         actions: [
@@ -303,7 +303,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             child: ClipRRect(
                                               borderRadius: BorderRadius.circular(20),
                                               child: Image.asset(
-                                                profile['avatar'] ?? 'assets/images/prof.png',
+                                                ProfileHelper.normalizeAvatarPath(profile['avatar']),
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error, stackTrace) {
                                                   return Container(

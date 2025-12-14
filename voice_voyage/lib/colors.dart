@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
+import 'gameplay.dart';
 
-class ColorsPage extends StatelessWidget {
+class ColorsPage extends StatefulWidget {
   const ColorsPage({super.key});
+
+  @override
+  State<ColorsPage> createState() => _ColorsPageState();
+}
+
+class _ColorsPageState extends State<ColorsPage> {
+  final PageController _pageController = PageController(viewportFraction: 0.8);
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +26,6 @@ class ColorsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top title with back button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -38,106 +52,144 @@ class ColorsPage extends StatelessWidget {
               ),
             ),
 
-            // Horizontal scroll area (left content + cards)
             Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Left content column
-                      SizedBox(
-                        width: 330,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "3 Level Course",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 330,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "3 Level Course",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              "Let your child learn the different kinds of colors, "
-                              "such as the primary colors or the colors found in a rainbow. ",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Let your child learn the different kinds of colors, "
+                            "such as the primary colors or the colors found in a rainbow. ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
                             ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              "Level Goals",
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Level Goals",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              "How to identify different colors. ",
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.black87,
-                                height: 1.4,
-                              ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "How to identify different colors. ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              height: 1.4,
                             ),
-                            const SizedBox(height: 20),
-                            const Text(
-                              "Progress",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Progress",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
                             ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              "Level 1 of 3",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Level 1 of 3",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+                    ),
 
-                      const SizedBox(width: 40),
+                    const SizedBox(width: 40),
 
-                      // Card 1 -> uses asset GIF
-                      _greetingCard(
-                        assetImagePath: 'assets/images/1.png',
-                        bannerText: "Animals",
-                        title: "The First Three Colors",
-                        subtitle: "Level 1: Primary Colors",
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Flexible(
+                            child: PageView(
+                              physics: const BouncingScrollPhysics(),
+                              controller: _pageController,
+                              onPageChanged: (i) => setState(() => _currentPage = i),
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: _buildTappableCard(
+                                    context,
+                                    assetImagePath: 'assets/images/1.png',
+                                    bannerText: "Animals",
+                                    title: "The First Three Colors",
+                                    subtitle: "Level 1: Primary Colors",
+                                    levelNumber: 1,
+                                    targetWord: "",
+                                    prompt: "",
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: _buildTappableCard(
+                                    context,
+                                    assetImagePath: 'assets/images/2.1.png',
+                                    bannerText: "Animals",
+                                    title: "Color Combination!",
+                                    subtitle: "Level 2: Secondary Colors",
+                                    levelNumber: 2,
+                                    targetWord: "",
+                                    prompt: "",
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  child: _buildTappableCard(
+                                    context,
+                                    assetImagePath: 'assets/images/3.png',
+                                    bannerText: "Animals",
+                                    title: "Let’s Differerntiate",
+                                    subtitle: "Level 3: Do i know the animal?",
+                                    levelNumber: 3,
+                                    targetWord: "",
+                                    prompt: "",
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(3, (i) {
+                              final active = i == _currentPage;
+                              return Container(
+                                width: active ? 10 : 8,
+                                height: active ? 10 : 8,
+                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                decoration: BoxDecoration(
+                                  color: active ? const Color(0xFF00A5FF) : Colors.grey.shade300,
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 25),
-
-                      // Card 2
-                      _greetingCard(
-                        assetImagePath: 'assets/images/2.1.png',
-                        bannerText: "Animals",
-                        title: "Color Combination!",
-                        subtitle: "Level 2: Secondary Colors",
-                      ),
-                      const SizedBox(width: 25),
-
-                      // Card 3
-                      _greetingCard(
-                        assetImagePath: 'assets/images/3.png',
-                        bannerText: "Animals",
-                        title: "Let’s Differerntiate",
-                        subtitle: "Level 3: Do i know the animal?",
-                      ),
-                      const SizedBox(width: 20),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -181,7 +233,7 @@ class ColorsPage extends StatelessWidget {
                   ),
                   child: Image.asset(
                     assetImagePath,
-                    height: 150,
+                    height: 260,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
@@ -257,6 +309,43 @@ class ColorsPage extends StatelessWidget {
 
           const SizedBox(height: 12),
         ],
+      ),
+    );
+  }
+
+  // Tappable card that navigates to GameplayScreen (moved out of build)
+  Widget _buildTappableCard(
+    BuildContext context, {
+    required String assetImagePath,
+    required String bannerText,
+    required String title,
+    required String subtitle,
+    required int levelNumber,
+    required String targetWord,
+    required String prompt,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GameplayScreen(
+              levelNumber: levelNumber,
+              targetWord: targetWord,
+              prompt: prompt,
+              backgroundImagePath: assetImagePath,
+              characterImagePath: assetImagePath,
+              currentStars: 0,
+              category: 'colors',
+            ),
+          ),
+        );
+      },
+      child: _greetingCard(
+        assetImagePath: assetImagePath,
+        bannerText: bannerText,
+        title: title,
+        subtitle: subtitle,
       ),
     );
   }

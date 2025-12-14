@@ -3,6 +3,33 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProfileHelper {
   static final _firestore = FirebaseFirestore.instance;
 
+  /// Normalize avatar paths to ensure they're valid and match actual assets
+  static String normalizeAvatarPath(dynamic avatarPath) {
+    // Convert to string if not already, return default if null
+    String path = avatarPath is String ? avatarPath : '';
+    
+    if (path.isEmpty) {
+      return 'assets/images/prof.png';
+    }
+
+    // Map old prof1.png references to prof.png (which actually exists)
+    if (path.contains('prof1.png')) {
+      return 'assets/images/prof.png';
+    }
+
+    // Ensure the path doesn't have double 'assets/'
+    if (path.startsWith('assets/assets/')) {
+      return path.replaceFirst('assets/assets/', 'assets/');
+    }
+
+    // Validate that path starts with 'assets/'
+    if (!path.startsWith('assets/')) {
+      return 'assets/images/prof.png';
+    }
+
+    return path;
+  }
+
   /// Create a new profile for a user
   static Future<String> createProfile({
     required String userId,

@@ -65,6 +65,8 @@ class _HomePageState extends State<HomePage> {
     'colors': 0.0,
   };
 
+  int _currentCategoryIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -116,11 +118,16 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 8),
               _progressTile('Colors', 'colors'),
               const Spacer(),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
+              ListTile(
+                title: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                trailing: const Icon(Icons.logout, color: Colors.red),
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('userId');
+                  await prefs.remove('userEmail');
+                  await prefs.remove('selectedProfileId');
+                  Navigator.pushReplacementNamed(context, '/login');
                 },
-                child: const Text('Close'),
               ),
             ],
           ),
@@ -179,16 +186,38 @@ class _HomePageState extends State<HomePage> {
               children: [
                 _Header(),
                 Expanded(
-                  child: CarouselSlider.builder(
-                    itemCount: categories.length,
-                    itemBuilder: (context, index, _) =>
-                        CategoryCard(category: categories[index]),
-                    options: CarouselOptions(
-                      height: 240,
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.58,
-                      enableInfiniteScroll: false,
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CarouselSlider.builder(
+                        itemCount: categories.length,
+                        itemBuilder: (context, index, _) =>
+                            CategoryCard(category: categories[index]),
+                        options: CarouselOptions(
+                          height: 360,
+                          enlargeCenterPage: true,
+                          viewportFraction: 0.58,
+                          enableInfiniteScroll: false,
+                          onPageChanged: (idx, reason) => setState(() => _currentCategoryIndex = idx),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(categories.length, (i) {
+                          final active = i == _currentCategoryIndex;
+                          return Container(
+                            width: active ? 10 : 8,
+                            height: active ? 10 : 8,
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              color: active ? Colors.white : Colors.white54,
+                              shape: BoxShape.circle,
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -201,8 +230,35 @@ class _HomePageState extends State<HomePage> {
 }
 
 // -------------------- Header Widget --------------------
-class _Header extends StatelessWidget {
+class _Header extends StatefulWidget {
   const _Header();
+
+  @override
+  State<_Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<_Header> {
+  String _avatar = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvatar();
+  }
+
+  Future<void> _loadAvatar() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final profileId = prefs.getString('selectedProfileId');
+      if (profileId == null) return;
+      final profile = await ProfileHelper.getProfile(profileId);
+      if (profile != null) {
+        setState(() => _avatar = ProfileHelper.normalizeAvatarPath(profile['avatar']));
+      }
+    } catch (e) {
+      print('Header avatar load error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,17 +266,25 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-        // Making the sun image clickable using GestureDetector
-        GestureDetector(
-          onTap: () {
-            // Navigate back to the profile page when the sun image is clicked
-            Navigator.pushReplacementNamed(context, '/profile');
-          },
-          child: _IconBox(
-            color: const Color(0xFF00BCD4),
-            child: Image.asset('assets/images/head sun.png'), // Sun Image
+          GestureDetector(
+            onTap: () {
+              Navigator.pushReplacementNamed(context, '/profile');
+            },
+            child: _IconBox(
+              color: const Color(0xFF00BCD4),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: _avatar.isNotEmpty
+                    ? Image.asset(
+                        _avatar,
+                        width: 40,
+                        height: 40,
+                        fit: BoxFit.cover,
+                      )
+                    : SizedBox(width: 40, height: 40),
+              ),
+            ),
           ),
-        ),
           const Spacer(),
           const Text(
             'Basic Speech',
@@ -232,22 +296,20 @@ class _Header extends StatelessWidget {
           ),
           const Icon(Icons.arrow_drop_down, color: Colors.white, size: 28),
           const Spacer(),
-          // Removed unused search icon
           const SizedBox(width: 12),
-          // Replace menu with progress/profile icon that opens end drawer
           GestureDetector(
             onTap: () {
               Scaffold.of(context).openEndDrawer();
             },
             child: _IconBox(
               color: Colors.white24,
-              child: const Icon(Icons.person, color: Colors.white),
+              child: const Icon(Icons.menu, color: Colors.white),
             ),
           ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 }
 
 // -------------------- Icon Box --------------------
@@ -295,19 +357,19 @@ class CategoryCard extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           child: Column(
             children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: category.bg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      category.image,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
+              // fixed height image area so carousel can size consistently
+              Container(
+                height: 220,
+                decoration: BoxDecoration(
+                  color: category.bg,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    category.image,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                   ),
                 ),
               ),

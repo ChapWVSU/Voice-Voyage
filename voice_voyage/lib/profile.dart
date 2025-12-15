@@ -224,7 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.blue,
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 35),
                     if (_profiles.isEmpty)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.center,

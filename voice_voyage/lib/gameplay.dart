@@ -64,6 +64,15 @@ class _GameplayScreenState extends State<GameplayScreen>
   bool _recorderReady = false;
   String? _audioFilePath;
 
+  // Profile
+  String? _profileId;
+  String _userName = "Friend"; // will be loaded from preferences
+
+  // Level lock state
+  bool _isCheckingLevel = true;
+  bool _isLocked = false;
+  int _currentUnlockedLevel = 1;
+
   // Azure
   static const String _speechKey =
       "7iyT7N6LiE2S99igEjCvt3NHZEy8xCfPsxQLzN60sZcEqGn4F5HKJQQJ99BKAC3pKaRXJ3w3AAAYACOGzpew";
@@ -75,11 +84,8 @@ class _GameplayScreenState extends State<GameplayScreen>
   double fluencyScore = 0.0;
   double pronScore = 0.0;
 
-  // User name
-  final String userName = "Bensoy";
-
   // Level script (3 phrases per level)
-  late final List<_PhraseStep> _steps;
+  late List<_PhraseStep> _steps;
   int _stepIndex = 0;
 
   _PhraseStep get _currentStep => _steps[_stepIndex];
@@ -87,9 +93,6 @@ class _GameplayScreenState extends State<GameplayScreen>
   @override
   void initState() {
     super.initState();
-
-    // Pick script by category + level
-    _steps = _getStepsForLevel(widget.category, widget.levelNumber, userName);
 
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
@@ -102,6 +105,27 @@ class _GameplayScreenState extends State<GameplayScreen>
 
     _recorder = FlutterSoundRecorder();
     _initializeRecorder();
+
+    // Load profile + name first, then build steps using that name
+    _initProfileAndScript();
+  }
+
+  Future<void> _initProfileAndScript() async {
+    final prefs = await SharedPreferences.getInstance(); 
+    final pid = prefs.getString('selectedProfileId');
+    final name = prefs.getString('selectedProfileName')?.trim();
+
+    if (!mounted) return;
+
+    setState(() {
+      _profileId = pid;
+      if (name != null && name.isNotEmpty) {
+        _userName = name;
+      }
+    });
+
+    _steps = _getStepsForLevel(widget.category, widget.levelNumber, _userName);
+    await _loadProfileAndCheckLevel();
   }
 
   @override
@@ -111,79 +135,106 @@ class _GameplayScreenState extends State<GameplayScreen>
     super.dispose();
   }
 
+  // ==========================
+  // PROFILE + LEVEL CHECK
+  // ==========================
+  Future<void> _loadProfileAndCheckLevel() async {
+    final prefs = await SharedPreferences.getInstance(); 
+    final pid = _profileId ?? prefs.getString('selectedProfileId');
+
+    if (!mounted) return;
+
+    if (pid == null) {
+      setState(() {
+        _profileId = null;
+        _currentUnlockedLevel = 1;
+        _isLocked = true;
+        _isCheckingLevel = false;
+      });
+      return;
+    }
+
+    final current = await ProfileHelper.getCurrentLevel(
+      profileId: pid,
+      category: widget.category,
+    );
+
+    final allowed = await ProfileHelper.canAccessLevel(
+      profileId: pid,
+      category: widget.category,
+      level: widget.levelNumber,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _profileId = pid;
+      _currentUnlockedLevel = current;
+      _isLocked = !allowed;
+      _isCheckingLevel = false;
+    });
+  }
+
+  // ==========================
+  // SCRIPT
+  // ==========================
   List<_PhraseStep> _getStepsForLevel(String category, int level, String name) {
-    // Animals (3 levels)
     if (category == 'animals') {
       switch (level) {
         case 1:
-          return const [
+          return [
             _PhraseStep(
               referenceText: "Cow",
               promptText: "Can you say “Cow”?",
-              successMessage: "Great job!",
+              successMessage: "Great job, $name!",
             ),
             _PhraseStep(
               referenceText: "Pig",
               promptText: "Now say “Pig”",
-              successMessage: "Well done!",
+              successMessage: "Well done, $name!",
             ),
             _PhraseStep(
               referenceText: "Chicken",
               promptText: "Now say “Chicken”",
-              successMessage: "Awesome!",
+              successMessage: "Awesome, $name!",
             ),
-          ].map((s) => _PhraseStep(
-                referenceText: s.referenceText,
-                promptText: s.promptText,
-                successMessage: "${s.successMessage} $name!",
-              )).toList();
-
+          ];
         case 2:
-          return const [
+          return [
             _PhraseStep(
               referenceText: "Lion",
               promptText: "Can you say “Lion”?",
-              successMessage: "Roar-some!",
+              successMessage: "Roar-some, $name!",
             ),
             _PhraseStep(
               referenceText: "Tiger",
               promptText: "Now say “Tiger”",
-              successMessage: "Great job!",
+              successMessage: "Great job, $name!",
             ),
             _PhraseStep(
               referenceText: "Elephant",
               promptText: "Now say “Elephant”",
-              successMessage: "Excellent!",
+              successMessage: "Excellent, $name!",
             ),
-          ].map((s) => _PhraseStep(
-                referenceText: s.referenceText,
-                promptText: s.promptText,
-                successMessage: "${s.successMessage} $name!",
-              )).toList();
-
+          ];
         case 3:
-          return const [
+          return [
             _PhraseStep(
               referenceText: "Farm animal",
               promptText: "Can you say “Farm animal”?",
-              successMessage: "Nice!",
+              successMessage: "Nice, $name!",
             ),
             _PhraseStep(
               referenceText: "Wild animal",
               promptText: "Now say “Wild animal”",
-              successMessage: "Good job!",
+              successMessage: "Good job, $name!",
             ),
             _PhraseStep(
               referenceText: "I can name the animals",
               promptText: "Now say “I can name the animals”",
-              successMessage: "You did it!",
+              successMessage: "You did it, $name!",
             ),
-          ].map((s) => _PhraseStep(
-                referenceText: s.referenceText,
-                promptText: s.promptText,
-                successMessage: "${s.successMessage} $name!",
-              )).toList();
-
+          ];
         default:
           return [
             _PhraseStep(
@@ -195,7 +246,6 @@ class _GameplayScreenState extends State<GameplayScreen>
       }
     }
 
-    // Colors (3 levels)
     if (category == 'colors') {
       switch (level) {
         case 1:
@@ -216,7 +266,6 @@ class _GameplayScreenState extends State<GameplayScreen>
               successMessage: "Awesome, $name!",
             ),
           ];
-
         case 2:
           return [
             _PhraseStep(
@@ -235,7 +284,6 @@ class _GameplayScreenState extends State<GameplayScreen>
               successMessage: "Excellent, $name!",
             ),
           ];
-
         case 3:
           return [
             _PhraseStep(
@@ -254,7 +302,6 @@ class _GameplayScreenState extends State<GameplayScreen>
               successMessage: "You did it, $name!",
             ),
           ];
-
         default:
           return [
             _PhraseStep(
@@ -266,7 +313,7 @@ class _GameplayScreenState extends State<GameplayScreen>
       }
     }
 
-    // Greetings (your existing 3 levels)
+    // Greetings default
     switch (level) {
       case 1:
         return [
@@ -286,7 +333,6 @@ class _GameplayScreenState extends State<GameplayScreen>
             successMessage: "You’re amazing, $name!",
           ),
         ];
-
       case 2:
         return [
           _PhraseStep(
@@ -305,7 +351,6 @@ class _GameplayScreenState extends State<GameplayScreen>
             successMessage: "Perfect, $name!",
           ),
         ];
-
       case 3:
         return [
           _PhraseStep(
@@ -325,7 +370,6 @@ class _GameplayScreenState extends State<GameplayScreen>
             successMessage: "You did it, $name!",
           ),
         ];
-
       default:
         return [
           _PhraseStep(
@@ -337,6 +381,9 @@ class _GameplayScreenState extends State<GameplayScreen>
     }
   }
 
+  // ==========================
+  // RECORDER
+  // ==========================
   Future<void> _initializeRecorder() async {
     final micStatus = await Permission.microphone.request();
     if (micStatus != PermissionStatus.granted) {
@@ -345,7 +392,6 @@ class _GameplayScreenState extends State<GameplayScreen>
     }
     await _recorder.openRecorder();
     _recorderReady = true;
-    print("✅ Recorder ready");
   }
 
   Future<String> _getTempFilePath() async {
@@ -354,7 +400,7 @@ class _GameplayScreenState extends State<GameplayScreen>
   }
 
   void _startRecording() async {
-    if (!_recorderReady || isRecording || showLevelComplete) return;
+    if (_isLocked || !_recorderReady || isRecording || showLevelComplete) return;
 
     setState(() {
       isRecording = true;
@@ -364,7 +410,6 @@ class _GameplayScreenState extends State<GameplayScreen>
     final path = await _getTempFilePath();
     _audioFilePath = path;
 
-    print("🎙 START recording -> $path");
     await _recorder.startRecorder(
       toFile: path,
       codec: Codec.pcm16WAV,
@@ -376,15 +421,11 @@ class _GameplayScreenState extends State<GameplayScreen>
   void _stopRecordingAndAnalyze() async {
     if (!isRecording) return;
 
-    setState(() {
-      isRecording = false;
-    });
-
+    setState(() => isRecording = false);
     await _recorder.stopRecorder();
-    print("⏹️ Recording stopped");
 
     if (_audioFilePath == null) {
-      _showFeedback(false);
+      _showFeedbackOverlay(false);
       return;
     }
 
@@ -392,35 +433,67 @@ class _GameplayScreenState extends State<GameplayScreen>
     await _cleanupAudioFile();
   }
 
+  Future<void> _cleanupAudioFile() async {
+    final path = _audioFilePath;
+    _audioFilePath = null;
+    if (path == null) return;
+
+    try {
+      final f = File(path);
+      if (await f.exists()) await f.delete();
+    } catch (_) {}
+  }
+
+  // ==========================
+  // AZURE
+  // ==========================
   double _readScoreFromNBest(Map<String, dynamic> nBest0, String key) {
     final pa = nBest0['PronunciationAssessment'];
-    if (pa is Map && pa[key] != null) {
-      final v = pa[key];
-      if (v is num) return v.toDouble();
-    }
+    if (pa is Map && pa[key] is num) return (pa[key] as num).toDouble();
     final v2 = nBest0[key];
     if (v2 is num) return v2.toDouble();
     return 0.0;
   }
 
+  Future<String?> _getAzureAccessToken() async {
+    try {
+      final uri = Uri.parse(
+        "https://$_region.api.cognitive.microsoft.com/sts/v1.0/issueToken",
+      );
+      final response = await http.post(
+        uri,
+        headers: {
+          'Ocp-Apim-Subscription-Key': _speechKey,
+          'Content-type': 'application/x-www-form-urlencoded',
+          'Content-Length': '0',
+        },
+      );
+      if (response.statusCode == 200) return response.body.trim();
+      print("❌ Token request failed: ${response.statusCode}");
+      return null;
+    } catch (e) {
+      print("❌ Error getting token: $e");
+      return null;
+    }
+  }
+
   Future<void> _sendToAzurePronunciationAssessment() async {
     final path = _audioFilePath;
     if (path == null) {
-      _showFeedback(false);
+      _showFeedbackOverlay(false);
       return;
     }
 
     final file = File(path);
     if (!await file.exists()) {
-      print("❌ Audio file does not exist");
-      _showFeedback(false);
+      _showFeedbackOverlay(false);
       return;
     }
 
     try {
       final token = await _getAzureAccessToken();
       if (token == null) {
-        _showFeedback(false);
+        _showFeedbackOverlay(false);
         return;
       }
 
@@ -430,6 +503,7 @@ class _GameplayScreenState extends State<GameplayScreen>
         "Granularity": "FullText",
         "Dimension": "Comprehensive",
       });
+
       final pronAssessmentBase64 =
           base64Encode(utf8.encode(pronAssessmentJson));
 
@@ -449,9 +523,6 @@ class _GameplayScreenState extends State<GameplayScreen>
         body: await file.readAsBytes(),
       );
 
-      print("📡 Azure status: ${response.statusCode}");
-      print("📡 Azure body: ${response.body}");
-
       if (response.statusCode != 200) {
         if (!mounted) return;
         setState(() {
@@ -459,7 +530,7 @@ class _GameplayScreenState extends State<GameplayScreen>
           fluencyScore = 0.0;
           pronScore = 0.0;
         });
-        _showFeedback(false);
+        _showFeedbackOverlay(false);
         return;
       }
 
@@ -473,7 +544,7 @@ class _GameplayScreenState extends State<GameplayScreen>
           fluencyScore = 0.0;
           pronScore = 0.0;
         });
-        _showFeedback(false);
+        _showFeedbackOverlay(false);
         return;
       }
 
@@ -493,7 +564,7 @@ class _GameplayScreenState extends State<GameplayScreen>
         pronScore = pro;
       });
 
-      _showFeedback(passed);
+      _showFeedbackOverlay(passed);
     } catch (e) {
       print("❌ Error calling Azure: $e");
       if (!mounted) return;
@@ -502,48 +573,14 @@ class _GameplayScreenState extends State<GameplayScreen>
         fluencyScore = 0.0;
         pronScore = 0.0;
       });
-      _showFeedback(false);
+      _showFeedbackOverlay(false);
     }
   }
 
-  Future<String?> _getAzureAccessToken() async {
-    try {
-      final uri = Uri.parse(
-        "https://$_region.api.cognitive.microsoft.com/sts/v1.0/issueToken",
-      );
-      final response = await http.post(
-        uri,
-        headers: {
-          'Ocp-Apim-Subscription-Key': _speechKey,
-          'Content-type': 'application/x-www-form-urlencoded',
-          'Content-Length': '0',
-        },
-      );
-      if (response.statusCode == 200) return response.body.trim();
-      print("❌ Token request failed: ${response.statusCode} ${response.body}");
-      return null;
-    } catch (e) {
-      print("❌ Error getting token: $e");
-      return null;
-    }
-  }
-
-  Future<void> _cleanupAudioFile() async {
-    final path = _audioFilePath;
-    _audioFilePath = null;
-    if (path == null) return;
-    try {
-      final f = File(path);
-      if (await f.exists()) {
-        await f.delete();
-        print("🗑️ Temp audio deleted");
-      }
-    } catch (e) {
-      print("Cleanup error: $e");
-    }
-  }
-
-  void _showFeedback(bool correct) {
+  // ==========================
+  // FEEDBACK + SAVE PROGRESS
+  // ==========================
+  void _showFeedbackOverlay(bool correct) {
     if (!mounted) return;
 
     setState(() {
@@ -552,52 +589,54 @@ class _GameplayScreenState extends State<GameplayScreen>
       feedbackMessage = correct ? _currentStep.successMessage : "Try again!";
     });
 
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
-      setState(() {
-        showFeedback = false;
-      });
+      setState(() => showFeedback = false);
 
       if (!correct) return;
 
       if (_stepIndex < _steps.length - 1) {
-        setState(() {
-          _stepIndex++;
-        });
-      } else {
-        setState(() {
-          showLevelComplete = true;
-        });
-        _saveProgress();
+        setState(() => _stepIndex++);
+        return;
       }
+
+      setState(() => showLevelComplete = true);
+      await _saveProgressAndRefreshUnlock();
     });
   }
 
-  Future<void> _saveProgress() async {
+  Future<void> _saveProgressAndRefreshUnlock() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final profileId = prefs.getString('selectedProfileId');
-      if (profileId == null) {
+      final pid = _profileId;
+      if (pid == null) {
         print('No selectedProfileId found; skipping saveProgress');
         return;
       }
 
       await ProfileHelper.saveProgress(
-        profileId: profileId,
+        profileId: pid,
         category: widget.category,
         level: widget.levelNumber,
         score: accuracyScore,
       );
-      print(
-          'Progress saved: $profileId ${widget.category} level ${widget.levelNumber} -> $accuracyScore');
+
+      final current = await ProfileHelper.getCurrentLevel(
+        profileId: pid,
+        category: widget.category,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _currentUnlockedLevel = current;
+      });
     } catch (e) {
       print('Error saving progress in gameplay: $e');
     }
   }
 
   void _playPromptAudio() {
-    print('🔊 Play: "${_currentStep.referenceText}"');
+    // Hook TTS or SFX here
   }
 
   void _onLevelCompleteOkay() {
@@ -605,8 +644,42 @@ class _GameplayScreenState extends State<GameplayScreen>
     Navigator.pop(context);
   }
 
+  // ==========================
+  // UI
+  // ==========================
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingLevel) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (_isLocked) {
+      return Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Level locked.\nFinish level ${widget.levelNumber - 1} first.\n"
+                  "Current unlocked level: $_currentUnlockedLevel",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Stack(
         children: [
@@ -644,8 +717,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                 ),
                 const SizedBox(height: 20),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
@@ -665,7 +738,7 @@ class _GameplayScreenState extends State<GameplayScreen>
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
                       color: Color.fromARGB(221, 0, 0, 0),
-                      height: 1.3,
+                      height: 1,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -728,7 +801,6 @@ class _GameplayScreenState extends State<GameplayScreen>
               ],
             ),
           ),
-
           if (showFeedback)
             Positioned.fill(
               child: Container(
@@ -777,7 +849,6 @@ class _GameplayScreenState extends State<GameplayScreen>
                 ),
               ),
             ),
-
           if (showLevelComplete)
             Positioned.fill(
               child: Container(
@@ -813,7 +884,7 @@ class _GameplayScreenState extends State<GameplayScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Good job, $userName!",
+                          "Good job, $_userName!",
                           style: const TextStyle(
                             fontSize: 22,
                             color: Colors.black87,
@@ -822,8 +893,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                         const SizedBox(height: 16),
                         const Text(
                           "Reward: 10 candies",
-                          style: TextStyle(
-                              fontSize: 18, color: Colors.purple),
+                          style:
+                              TextStyle(fontSize: 18, color: Colors.purple),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
@@ -840,7 +911,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                           ),
                           child: const Text(
                             "Okay",
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                            style:
+                                TextStyle(fontSize: 18, color: Colors.white),
                           ),
                         ),
                       ],

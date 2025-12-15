@@ -5,9 +5,8 @@ class ProfileHelper {
 
   /// Normalize avatar paths to ensure they're valid and match actual assets
   static String normalizeAvatarPath(dynamic avatarPath) {
-    // Convert to string if not already, return default if null
     String path = avatarPath is String ? avatarPath : '';
-    
+
     if (path.isEmpty) {
       return 'assets/images/prof.png';
     }
@@ -53,11 +52,9 @@ class ProfileHelper {
           .where('userId', isEqualTo: userId)
           .get();
 
-      // Sort in memory instead of using orderBy to avoid Firestore index requirement
-      final profiles = snapshot.docs
-          .map((doc) => {'id': doc.id, ...doc.data()})
-          .toList();
-      
+      final profiles =
+          snapshot.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+
       // Sort by created_at descending (newest first)
       profiles.sort((a, b) {
         final aTime = a['created_at'] as Timestamp?;
@@ -65,7 +62,7 @@ class ProfileHelper {
         if (aTime == null || bTime == null) return 0;
         return bTime.compareTo(aTime);
       });
-      
+
       return profiles;
     } catch (e) {
       print('Error fetching profiles: $e');
@@ -104,8 +101,19 @@ class ProfileHelper {
     }
   }
 
+  // =========================
+  // PROGRESS (matches your screenshot fields) [attached_image:1]
+  // docId format: <profileId>_<category>_level<level>
+  // =========================
+
+  static String _progressDocId(String profileId, String category, int level) {
+    return '${profileId}_${category.toLowerCase()}_level$level';
+  }
+
   /// Save progress (score) for a specific profile, category and level.
-  /// Document id format: `<category>-level<levelNumber>` (e.g. greetings-level1)
+  /// Writes into:
+  /// - Top-level `progress` collection (required)
+  /// - Also under `profiles/<profileId>/progress` (optional compatibility)
   static Future<void> saveProgress({
     required String profileId,
     required String category,
@@ -113,25 +121,25 @@ class ProfileHelper {
     required double score,
   }) async {
     try {
-      final docId = '${profileId}_${category.toLowerCase()}_level$level';
+      final docId = _progressDocId(profileId, category, level);
 
-      // Write into a dedicated top-level `progress` collection for easier queries
-      final topRef = _firestore.collection('progress').doc(docId);
-      await topRef.set({
+      // Top-level progress collection (this is what your screenshot shows) [attached_image:1]
+      await _firestore.collection('progress').doc(docId).set({
         'profileId': profileId,
         'category': category,
         'level': level,
         'score': score,
-        'updated_at': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+        'updated_at': FieldValue.serverTimestamp(), // server timestamp [web:640]
+      }, SetOptions(merge: true)); // merge behavior supported by FlutterFire [web:645]
 
-      // Also keep a copy under the profile document for quick access (backwards compat)
-      final profileRef = _firestore
+      // Optional copy under profile
+      await _firestore
           .collection('profiles')
           .doc(profileId)
           .collection('progress')
-          .doc('${category.toLowerCase()}-level$level');
-      await profileRef.set({
+          .doc('${category.toLowerCase()}-level$level')
+          .set({
+        'profileId': profileId,
         'category': category,
         'level': level,
         'score': score,
@@ -143,18 +151,77 @@ class ProfileHelper {
     }
   }
 
-  /// Get progress entries for a profile (returns list of progress docs)
+  /// Get ALL progress entries for a profile (top-level progress docs)
   static Future<List<Map<String, dynamic>>> getProgress(String profileId) async {
     try {
-      // Query the top-level `progress` collection for entries belonging to this profile
       final snap = await _firestore
           .collection('progress')
           .where('profileId', isEqualTo: profileId)
           .get();
+
       return snap.docs.map((d) => {'id': d.id, ...d.data()}).toList();
     } catch (e) {
       print('Error getting progress: $e');
       return [];
     }
+  }
+
+  /// Get progress doc for ONE level (null if not done yet)
+  static Future<Map<String, dynamic>?> getProgressForLevel({
+    required String profileId,
+    required String category,
+    required int level,
+  }) async {
+    try {
+      final docId = _progressDocId(profileId, category, level);
+      final doc = await _firestore.collection('progress').doc(docId).get();
+      if (!doc.exists) return null;
+      return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+    } catch (e) {
+      print('Error getting progress for level: $e');
+      return null;
+    }
+  }
+
+  /// Current unlocked level = highest completed + 1 (if none, 1)
+  static Future<int> getCurrentLevel({
+    required String profileId,
+    required String category,
+  }) async {
+    try {
+      final snap = await _firestore
+          .collection('progress')
+          .where('profileId', isEqualTo: profileId)
+          .where('category', isEqualTo: category)
+          .get();
+
+      int highest = 0;
+      for (final d in snap.docs) {
+        final lvl = (d.data()['level'] as num?)?.toInt() ?? 0;
+        if (lvl > highest) highest = lvl;
+      }
+      return highest + 1;
+    } catch (e) {
+      print('Error getting current level: $e');
+      return 1;
+    }
+  }
+
+  /// Access rule:
+  /// - Level 1 always open
+  /// - Level N requires Level N-1 exists
+  static Future<bool> canAccessLevel({
+    required String profileId,
+    required String category,
+    required int level,
+  }) async {
+    if (level <= 1) return true;
+
+    final prev = await getProgressForLevel(
+      profileId: profileId,
+      category: category,
+      level: level - 1,
+    );
+    return prev != null;
   }
 }

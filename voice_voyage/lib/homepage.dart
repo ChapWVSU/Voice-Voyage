@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: (context, index, _) =>
                             CategoryCard(category: categories[index]),
                         options: CarouselOptions(
-                          height: 300,
+                          height: 210,
                           enlargeCenterPage: true,
                           viewportFraction: 0.58,
                           enableInfiniteScroll: false,

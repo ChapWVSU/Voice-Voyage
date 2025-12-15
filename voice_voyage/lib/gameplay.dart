@@ -17,7 +17,7 @@ class GameplayScreen extends StatefulWidget {
   final String backgroundImagePath;
   final String characterImagePath;
   final int currentStars;
-  final String category; // e.g. 'greetings', 'animals'
+  final String category; // e.g. 'greetings', 'animals', 'colors'
 
   const GameplayScreen({
     Key? key,
@@ -78,24 +78,8 @@ class _GameplayScreenState extends State<GameplayScreen>
   // User name
   final String userName = "Bensoy";
 
-  // Level script (3 phrases)
-  final List<_PhraseStep> _steps = const [
-    _PhraseStep(
-      referenceText: "Hello",
-      promptText: "Can you say “Hello” to your friend?",
-      successMessage: "Very Good, Bensoy!",
-    ),
-    _PhraseStep(
-      referenceText: "Hello friend",
-      promptText: "Can you say “Hello friend”?",
-      successMessage: "Well done, Bensoy!",
-    ),
-    _PhraseStep(
-      referenceText: "Hello friend, how are you?",
-      promptText: "Can you say “Hello friend, how are you?”",
-      successMessage: "You’re amazing, Bensoy!",
-    ),
-  ];
+  // Level script (3 phrases per level)
+  late final List<_PhraseStep> _steps;
   int _stepIndex = 0;
 
   _PhraseStep get _currentStep => _steps[_stepIndex];
@@ -103,6 +87,9 @@ class _GameplayScreenState extends State<GameplayScreen>
   @override
   void initState() {
     super.initState();
+
+    // Pick script by category + level
+    _steps = _getStepsForLevel(widget.category, widget.levelNumber, userName);
 
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1000),
@@ -124,10 +111,236 @@ class _GameplayScreenState extends State<GameplayScreen>
     super.dispose();
   }
 
+  List<_PhraseStep> _getStepsForLevel(String category, int level, String name) {
+    // Animals (3 levels)
+    if (category == 'animals') {
+      switch (level) {
+        case 1:
+          return const [
+            _PhraseStep(
+              referenceText: "Cow",
+              promptText: "Can you say “Cow”?",
+              successMessage: "Great job!",
+            ),
+            _PhraseStep(
+              referenceText: "Pig",
+              promptText: "Now say “Pig”",
+              successMessage: "Well done!",
+            ),
+            _PhraseStep(
+              referenceText: "Chicken",
+              promptText: "Now say “Chicken”",
+              successMessage: "Awesome!",
+            ),
+          ].map((s) => _PhraseStep(
+                referenceText: s.referenceText,
+                promptText: s.promptText,
+                successMessage: "${s.successMessage} $name!",
+              )).toList();
+
+        case 2:
+          return const [
+            _PhraseStep(
+              referenceText: "Lion",
+              promptText: "Can you say “Lion”?",
+              successMessage: "Roar-some!",
+            ),
+            _PhraseStep(
+              referenceText: "Tiger",
+              promptText: "Now say “Tiger”",
+              successMessage: "Great job!",
+            ),
+            _PhraseStep(
+              referenceText: "Elephant",
+              promptText: "Now say “Elephant”",
+              successMessage: "Excellent!",
+            ),
+          ].map((s) => _PhraseStep(
+                referenceText: s.referenceText,
+                promptText: s.promptText,
+                successMessage: "${s.successMessage} $name!",
+              )).toList();
+
+        case 3:
+          return const [
+            _PhraseStep(
+              referenceText: "Farm animal",
+              promptText: "Can you say “Farm animal”?",
+              successMessage: "Nice!",
+            ),
+            _PhraseStep(
+              referenceText: "Wild animal",
+              promptText: "Now say “Wild animal”",
+              successMessage: "Good job!",
+            ),
+            _PhraseStep(
+              referenceText: "I can name the animals",
+              promptText: "Now say “I can name the animals”",
+              successMessage: "You did it!",
+            ),
+          ].map((s) => _PhraseStep(
+                referenceText: s.referenceText,
+                promptText: s.promptText,
+                successMessage: "${s.successMessage} $name!",
+              )).toList();
+
+        default:
+          return [
+            _PhraseStep(
+              referenceText: "Animal",
+              promptText: "Can you say “Animal”?",
+              successMessage: "Good job, $name!",
+            ),
+          ];
+      }
+    }
+
+    // Colors (3 levels)
+    if (category == 'colors') {
+      switch (level) {
+        case 1:
+          return [
+            _PhraseStep(
+              referenceText: "Red",
+              promptText: "Can you say “Red”?",
+              successMessage: "Great job, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "Blue",
+              promptText: "Now say “Blue”",
+              successMessage: "Well done, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "Yellow",
+              promptText: "Now say “Yellow”",
+              successMessage: "Awesome, $name!",
+            ),
+          ];
+
+        case 2:
+          return [
+            _PhraseStep(
+              referenceText: "Green",
+              promptText: "Can you say “Green”?",
+              successMessage: "Nice, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "Orange",
+              promptText: "Now say “Orange”",
+              successMessage: "Great job, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "Purple",
+              promptText: "Now say “Purple”",
+              successMessage: "Excellent, $name!",
+            ),
+          ];
+
+        case 3:
+          return [
+            _PhraseStep(
+              referenceText: "Rainbow",
+              promptText: "Can you say “Rainbow”?",
+              successMessage: "Amazing, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "I see colors",
+              promptText: "Now say “I see colors”",
+              successMessage: "Good job, $name!",
+            ),
+            _PhraseStep(
+              referenceText: "I can name the colors",
+              promptText: "Now say “I can name the colors”",
+              successMessage: "You did it, $name!",
+            ),
+          ];
+
+        default:
+          return [
+            _PhraseStep(
+              referenceText: "Color",
+              promptText: "Can you say “Color”?",
+              successMessage: "Good job, $name!",
+            ),
+          ];
+      }
+    }
+
+    // Greetings (your existing 3 levels)
+    switch (level) {
+      case 1:
+        return [
+          _PhraseStep(
+            referenceText: "Hello",
+            promptText: "Can you say “Hello” to your friend?",
+            successMessage: "Very good, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Hello friend",
+            promptText: "Can you say “Hello friend”?",
+            successMessage: "Well done, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Hello friend, how are you?",
+            promptText: "Can you say “Hello friend, how are you?”",
+            successMessage: "You’re amazing, $name!",
+          ),
+        ];
+
+      case 2:
+        return [
+          _PhraseStep(
+            referenceText: "Good morning, Mom",
+            promptText: "At home, can you say: “Good morning, Mom”?",
+            successMessage: "Nice greeting, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Good morning, Dad",
+            promptText: "Now try: “Good morning, Dad”",
+            successMessage: "Great job, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Good morning, Mom and Dad",
+            promptText: "Now say: “Good morning, Mom and Dad”",
+            successMessage: "Perfect, $name!",
+          ),
+        ];
+
+      case 3:
+        return [
+          _PhraseStep(
+            referenceText: "Good morning, Teacher",
+            promptText: "In school, say: “Good morning, Teacher”",
+            successMessage: "So polite, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Good morning, everyone",
+            promptText: "Now greet the class: “Good morning, everyone”",
+            successMessage: "Awesome, $name!",
+          ),
+          _PhraseStep(
+            referenceText: "Good morning, Teacher. Good morning, everyone",
+            promptText:
+                "Try both: “Good morning, Teacher. Good morning, everyone”",
+            successMessage: "You did it, $name!",
+          ),
+        ];
+
+      default:
+        return [
+          _PhraseStep(
+            referenceText: "Hello",
+            promptText: "Can you say “Hello”?",
+            successMessage: "Good job, $name!",
+          ),
+        ];
+    }
+  }
+
   Future<void> _initializeRecorder() async {
     final micStatus = await Permission.microphone.request();
     if (micStatus != PermissionStatus.granted) {
-      print("❌ Microphone permission denied");
+      print("❌ Microphone permission denied: $micStatus");
       return;
     }
     await _recorder.openRecorder();
@@ -180,10 +393,6 @@ class _GameplayScreenState extends State<GameplayScreen>
   }
 
   double _readScoreFromNBest(Map<String, dynamic> nBest0, String key) {
-    // Some responses put scores directly on NBest[0]:
-    //   "AccuracyScore": 100.0
-    // Some put them inside:
-    //   "PronunciationAssessment": { "AccuracyScore": 100.0 }
     final pa = nBest0['PronunciationAssessment'];
     if (pa is Map && pa[key] != null) {
       final v = pa[key];
@@ -352,7 +561,6 @@ class _GameplayScreenState extends State<GameplayScreen>
 
       if (!correct) return;
 
-      // Progress to next phrase or finish level
       if (_stepIndex < _steps.length - 1) {
         setState(() {
           _stepIndex++;
@@ -361,7 +569,6 @@ class _GameplayScreenState extends State<GameplayScreen>
         setState(() {
           showLevelComplete = true;
         });
-        // Save progress for this level (non-blocking)
         _saveProgress();
       }
     });
@@ -376,21 +583,20 @@ class _GameplayScreenState extends State<GameplayScreen>
         return;
       }
 
-      // Use accuracyScore as the metric to store
       await ProfileHelper.saveProgress(
         profileId: profileId,
         category: widget.category,
         level: widget.levelNumber,
         score: accuracyScore,
       );
-      print('Progress saved: $profileId ${widget.category} level ${widget.levelNumber} -> ${accuracyScore}');
+      print(
+          'Progress saved: $profileId ${widget.category} level ${widget.levelNumber} -> $accuracyScore');
     } catch (e) {
       print('Error saving progress in gameplay: $e');
     }
   }
 
   void _playPromptAudio() {
-    // Hook your TTS/audio here
     print('🔊 Play: "${_currentStep.referenceText}"');
   }
 
@@ -407,7 +613,6 @@ class _GameplayScreenState extends State<GameplayScreen>
           Positioned.fill(
             child: Image.asset(widget.backgroundImagePath, fit: BoxFit.cover),
           ),
-
           SafeArea(
             child: Column(
               children: [
@@ -437,9 +642,7 @@ class _GameplayScreenState extends State<GameplayScreen>
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 24),
                   padding: const EdgeInsets.all(20),
@@ -455,7 +658,9 @@ class _GameplayScreenState extends State<GameplayScreen>
                     ],
                   ),
                   child: Text(
-                    showLevelComplete ? "Level Complete!" : _currentStep.promptText,
+                    showLevelComplete
+                        ? "Level Complete!"
+                        : _currentStep.promptText,
                     style: const TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
@@ -465,13 +670,11 @@ class _GameplayScreenState extends State<GameplayScreen>
                     textAlign: TextAlign.center,
                   ),
                 ),
-
                 const Spacer(),
                 const Spacer(),
-
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 40),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -526,7 +729,6 @@ class _GameplayScreenState extends State<GameplayScreen>
             ),
           ),
 
-          // Feedback Overlay
           if (showFeedback)
             Positioned.fill(
               child: Container(
@@ -576,7 +778,6 @@ class _GameplayScreenState extends State<GameplayScreen>
               ),
             ),
 
-          // Level Complete Overlay
           if (showLevelComplete)
             Positioned.fill(
               child: Container(
@@ -599,7 +800,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star, size: 80, color: Colors.orange),
+                        const Icon(Icons.star,
+                            size: 80, color: Colors.orange),
                         const SizedBox(height: 16),
                         Text(
                           "Lvl ${widget.levelNumber} complete",
@@ -620,7 +822,8 @@ class _GameplayScreenState extends State<GameplayScreen>
                         const SizedBox(height: 16),
                         const Text(
                           "Reward: 10 candies",
-                          style: TextStyle(fontSize: 18, color: Colors.purple),
+                          style: TextStyle(
+                              fontSize: 18, color: Colors.purple),
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(

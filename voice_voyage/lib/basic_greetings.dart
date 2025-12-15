@@ -12,6 +12,10 @@ class BasicGreetingsPage extends StatefulWidget {
 class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
   int _currentPage = 0;
 
+  // Line-height presets (multiplier of fontSize)
+  static const double _lhTight = 1.05;
+  static const double _lhTightest = 1.0;
+
   @override
   void dispose() {
     super.dispose();
@@ -44,13 +48,13 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF00A5FF),
+                        height: _lhTightest,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -68,6 +72,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
+                              height: _lhTight,
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -77,7 +82,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.black87,
-                              height: 1.4,
+                              height: _lhTight,
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -86,6 +91,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
+                              height: _lhTight,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -94,7 +100,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.black87,
-                              height: 1.4,
+                              height: _lhTight,
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -103,14 +109,16 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
+                              height: _lhTight,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            "Level 1 of 3",
-                            style: TextStyle(
+                          Text(
+                            "Level ${_currentPage + 1} of 3",
+                            style: const TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
+                              height: _lhTight,
                             ),
                           ),
                         ],
@@ -119,61 +127,79 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
 
                     const SizedBox(width: 40),
 
-                    // PageView for the three cards
+                    // Carousel for the three cards
                     Expanded(
                       child: Column(
-                          children: [
-                            SizedBox(
-                              height: 360,
-                              child: CarouselSlider.builder(
-                                itemCount: 3,
-                                itemBuilder: (context, index, realIndex) {
-                                  final items = [
-                                    _buildTappableCard(
-                                      context: context,
-                                      assetImagePath: 'assets/images/Hello.gif',
-                                      bannerText: "Basic Greetings",
-                                      title: "Let's Greet!",
-                                      subtitle: "Level 1: The basics of greeting",
-                                      levelNumber: 1,
-                                      targetWord: "Hello",
-                                      prompt: "Can you say 'Hello' to your friend?",
-                                    ),
-                                    _buildTappableCard(
-                                      context: context,
-                                      assetImagePath: 'assets/images/Helloo.gif',
-                                      bannerText: "Basic Greetings",
-                                      title: "How to Greet Your Parents?",
-                                      subtitle: "Level 2: Greeting your parents",
-                                      levelNumber: 2,
-                                      targetWord: "Good morning, Mom and Dad",
-                                      prompt: "Can you greet your parents with 'Good morning, Mom and Dad'?",
-                                    ),
-                                    _buildTappableCard(
-                                      context: context,
-                                      assetImagePath: 'assets/images/bus.gif',
-                                      bannerText: "Basic Greetings",
-                                      title: "How to Greet in School?",
-                                      subtitle: "Level 3: Let's greet your teacher and friends",
-                                      levelNumber: 3,
-                                      targetWord: "Hello everyone",
-                                      prompt: "Can you greet your class with 'Hello everyone'?",
-                                    ),
-                                  ];
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                                    child: items[index],
-                                  );
-                                },
-                                options: CarouselOptions(
-                                  height: 360,
-                                  viewportFraction: 0.85,
-                                  enableInfiniteScroll: false,
-                                  enlargeCenterPage: true,
-                                  onPageChanged: (i, reason) => setState(() => _currentPage = i),
-                                ),
+                        children: [
+                          SizedBox(
+                            height: 206,
+                            child: CarouselSlider.builder(
+                              itemCount: 3,
+                              itemBuilder: (context, index, realIndex) {
+                                final items = [
+                                  _buildTappableCard(
+                                    context: context,
+                                    assetImagePath: 'assets/images/Hello.gif',
+                                    bannerText: "Basic Greetings",
+                                    title: "Let's Greet!",
+                                    subtitle:
+                                        "Level 1: The basics of greeting",
+                                    levelNumber: 1,
+                                    targetWord: "Hello",
+                                    prompt:
+                                        "Can you say 'Hello' to your friend?",
+                                    backgroundImagePath:
+                                        'assets/images/Hello.gif',
+                                    characterImagePath:
+                                        'assets/images/Hello.gif',
+                                  ),
+                                  _buildTappableCard(
+                                    context: context,
+                                    assetImagePath: 'assets/images/Helloo.gif',
+                                    bannerText: "Basic Greetings",
+                                    title: "How to Greet Your Parents?",
+                                    subtitle: "Level 2: Greeting your parents",
+                                    levelNumber: 2,
+                                    targetWord: "Good morning, Mom and Dad",
+                                    prompt:
+                                        "Can you greet your parents with 'Good morning, Mom and Dad'?",
+                                    backgroundImagePath:
+                                        'assets/images/Helloo.gif',
+                                    characterImagePath:
+                                        'assets/images/Helloo.gif',
+                                  ),
+                                  _buildTappableCard(
+                                    context: context,
+                                    assetImagePath: 'assets/images/bus.gif',
+                                    bannerText: "Basic Greetings",
+                                    title: "How to Greet in School?",
+                                    subtitle:
+                                        "Level 3: Let's greet your teacher and friends",
+                                    levelNumber: 3,
+                                    targetWord: "Good morning, everyone",
+                                    prompt:
+                                        "Can you greet your class with 'Good morning, everyone'?",
+                                    backgroundImagePath: 'assets/images/bus.gif',
+                                    characterImagePath: 'assets/images/bus.gif',
+                                  ),
+                                ];
+
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20),
+                                  child: items[index],
+                                );
+                              },
+                              options: CarouselOptions(
+                                height: 286,
+                                viewportFraction: 0.85,
+                                enableInfiniteScroll: false,
+                                enlargeCenterPage: true,
+                                onPageChanged: (i, reason) =>
+                                    setState(() => _currentPage = i),
                               ),
                             ),
+                          ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -182,9 +208,12 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                               return Container(
                                 width: active ? 10 : 8,
                                 height: active ? 10 : 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 6),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 6),
                                 decoration: BoxDecoration(
-                                  color: active ? const Color(0xFF00A5FF) : Colors.grey.shade300,
+                                  color: active
+                                      ? const Color(0xFF00A5FF)
+                                      : Colors.grey.shade300,
                                   shape: BoxShape.circle,
                                 ),
                               );
@@ -213,6 +242,8 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
     required int levelNumber,
     required String targetWord,
     required String prompt,
+    required String backgroundImagePath,
+    required String characterImagePath,
   }) {
     return GestureDetector(
       onTap: () {
@@ -223,8 +254,8 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
               levelNumber: levelNumber,
               targetWord: targetWord,
               prompt: prompt,
-              backgroundImagePath: 'assets/images/Hello.gif',
-              characterImagePath: 'assets/images/Hello.gif',
+              backgroundImagePath: backgroundImagePath,
+              characterImagePath: characterImagePath,
               currentStars: 0,
               category: 'greetings',
             ),
@@ -240,7 +271,7 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
     );
   }
 
-  // Card widget using Image.asset and errorBuilder fallback
+  // Card widget (image auto sizes to parent)
   Widget _greetingCard({
     required String assetImagePath,
     required String bannerText,
@@ -252,7 +283,6 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // IMAGE + GREEN BANNER
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -266,47 +296,48 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
             ),
             child: Column(
               children: [
-                // Image.asset automatically animates GIFs.
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12),
                   ),
-                  child: Image.asset(
-                    assetImagePath,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      // Friendly fallback if asset not found
-                      return Container(
-                        height: 150,
-                        color: Colors.grey.shade200,
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(
-                              Icons.broken_image,
-                              size: 36,
-                              color: Colors.grey,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 7,
+                    child: SizedBox.expand(
+                      child: Image.asset(
+                        assetImagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade200,
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(
+                                  Icons.broken_image,
+                                  size: 36,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  'Image not found',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    height: _lhTight,
+                                  ),
+                                ),
+                              ],
                             ),
-                            SizedBox(height: 6),
-                            Text(
-                              'Image not found',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
-
-                // Green banner
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 3),
                   decoration: const BoxDecoration(
                     color: Color(0xff4caf50),
                     borderRadius: BorderRadius.only(
@@ -321,37 +352,31 @@ class _BasicGreetingsPageState extends State<BasicGreetingsPage> {
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
+                      height: _lhTight,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 10),
-
-          // Title
           Text(
             title,
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              height: 1.2,
+              height: _lhTight,
             ),
           ),
-
           const SizedBox(height: 4),
-
-          // Subtitle
           Text(
             subtitle,
             style: const TextStyle(
               fontSize: 11,
               color: Colors.black54,
-              height: 1.3,
+              height: _lhTight,
             ),
           ),
-
           const SizedBox(height: 10),
         ],
       ),

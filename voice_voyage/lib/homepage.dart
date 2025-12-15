@@ -54,7 +54,7 @@
         title: 'Colors',
         color: Color(0xFF42A5F5),
         bg: Color(0xFFBBDEFB),
-        image: 'assets/images/carouselbus.gif',
+        image: 'assets/images/color.png',
         page: ColorsPage(),
       ),
     ];
